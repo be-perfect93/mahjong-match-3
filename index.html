@@ -170,6 +170,8 @@ button{font:inherit;color:inherit}
 .round{position:absolute;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
   background:radial-gradient(circle at 50% 35%,#5a5a5a,#1d1d1d);box-shadow:0 0 0 3px #cfcfcf,0 6px 14px rgba(0,0,0,.45)}
 .round svg{width:50%;height:50%}
+#turboBtn.on{background:radial-gradient(circle at 50% 35%,#ffe27a,#d9921c);box-shadow:0 0 0 3px #fff3b0,0 0 16px #ffd34d,0 6px 14px rgba(0,0,0,.45)}
+#turboBtn.on svg{fill:#5a2a05;stroke:#5a2a05}
 .menu{position:absolute;right:20px;bottom:100px;width:310px;padding:16px;border-radius:14px;background:rgba(25,10,6,.96);
   box-shadow:0 0 0 2px var(--gold2),0 14px 30px rgba(0,0,0,.5);display:none;z-index:20;font-size:12.5px;line-height:1.5}
 .menu.open{display:block}
@@ -609,6 +611,7 @@ button{font:inherit;color:inherit}
 
   <button class="round" id="homeBtn" aria-label="Home"><svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"><path d="M6 19 20 7l14 12"/><path d="M10 16v16h20V16"/></svg></button>
   <button class="round" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 40 40" stroke="#fff" stroke-width="3.4" stroke-linecap="round"><path d="M9 12h22M9 20h22M9 28h22"/></svg></button>
+  <button class="round" id="turboBtn" type="button" aria-label="Turbo" aria-pressed="false"><svg viewBox="0 0 40 40" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"><path d="M23 4 9 22h9l-2 14 15-19h-9z"/></svg></button>
   <div class="menu" id="menu">
     <h2>How to play</h2>
     <button class="menu-auto" id="autoBtn" aria-pressed="false"><span class="dot"></span><span>Auto-play</span></button>
@@ -622,6 +625,23 @@ button{font:inherit;color:inherit}
 <div id="rotate"><div><svg viewBox="0 0 70 70" fill="none" stroke="#fff" stroke-width="3"><rect x="22" y="8" width="26" height="46" rx="4"/><path d="M58 40a24 24 0 0 1-20 20m0 0 6-6m-6 6 6 5"/></svg>Rotate your screen to play</div></div>
 
 <script>
+/* ================= TURBO =================
+   Bật Turbo: mọi animation/timer của game chạy nhanh hơn 50% (TURBO_RATE = 1.5).
+   Gói lại setTimeout, Element.animate, CSS transition/animation, countTo và vòng lặp nhân vật. */
+var TURBO=1; const TURBO_RATE=1.5;
+(()=>{
+  const _setTimeout=window.setTimeout.bind(window), _animate=Element.prototype.animate;
+  window.setTimeout=(fn,ms,...a)=>_setTimeout(fn,(+ms||0)/TURBO,...a);
+  Element.prototype.animate=function(...a){ const an=_animate.apply(this,a); if(TURBO!==1) an.playbackRate=TURBO; return an; };
+  const speedUp=e=>{ if(TURBO!==1 && e.target.getAnimations) e.target.getAnimations().forEach(an=>{ an.playbackRate=TURBO; }); };
+  document.addEventListener('transitionrun',speedUp,true);
+  document.addEventListener('animationstart',speedUp,true);
+  window.setTurbo=on=>{
+    TURBO=on?TURBO_RATE:1;
+    document.getAnimations().forEach(an=>{ an.playbackRate=TURBO; });     // áp ngay cho animation đang chạy
+    const b=document.getElementById('turboBtn'); if(b){ b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }
+  };
+})();
 /* ================= CONFIG ================= */
 const CFG = {
   startBalance: 1000,
@@ -1031,7 +1051,7 @@ function stepFx(dt){particles=particles.filter(p=>{p.life+=dt;if(p.life>p.max)re
  if(mode==='loop'&&emo==='active'){fxClock+=dt;if(fxClock>.8){fxClock=0;burst(9);}}else fxClock=0;
  if(mode==='loop'&&emo==='sulk'){const f=(tm*F)%60;if(f>=36&&f<40&&!huffDone){huffDone=true;puff();}if(f<30)huffDone=false;}else huffDone=false;
 }
-function frame(now){let dt=Math.min(.05,(now-last)/1000);last=now;if(reduced.matches)dt=0;advance(dt);render(poseNow());stepFx(dt);requestAnimationFrame(frame);}
+function frame(now){let dt=Math.min(.05,(now-last)/1000)*TURBO;last=now;if(reduced.matches)dt=0;advance(dt);render(poseNow());stepFx(dt);requestAnimationFrame(frame);}
 Promise.all(Object.values(SK).flatMap(s=>Object.values(s.images).map(im=>new Promise(resolve=>{if(im.complete)return resolve();im.onload=resolve;im.onerror=resolve;})))).then(()=>requestAnimationFrame(frame)).catch(e=>console.error('Updated character rig failed to load',e));
 return function(event){if(event==='pick'){go('idle');return;}if(event==='crash'){celebrating=false;go('sulk');return;}celebrating=true;hold=event==='cashout'?2.15:1.7;go('active');};
 })();
@@ -1354,7 +1374,7 @@ async function endRound(reason){
 }
 function countTo(el,from,to,dur){
   const t0=performance.now();
-  return new Promise(res=>{ const step=n=>{ const k=Math.min(1,(n-t0)/(reduced()?1:dur)); el.textContent=fmt(from+(to-from)*k); k<1?requestAnimationFrame(step):res(); }; requestAnimationFrame(step); });
+  return new Promise(res=>{ const step=n=>{ const k=Math.min(1,(n-t0)/(reduced()?1:dur/TURBO)); el.textContent=fmt(from+(to-from)*k); k<1?requestAnimationFrame(step):res(); }; requestAnimationFrame(step); });
 }
 async function revealAll(){
   if(!chestEl.classList.contains('open')) chestEl.classList.add('open');
@@ -1406,6 +1426,7 @@ $('betUp').addEventListener('click',()=>{ if(phase==='idle'&&betIdx<CFG.bets.len
 $('menuBtn').addEventListener('click',()=>{ const o=$('menu').classList.toggle('open'); $('menuBtn').setAttribute('aria-expanded',o); });
 $('homeBtn').addEventListener('click',()=>{ $('menu').classList.remove('open'); if(autoPlay) toggleAuto(); });
 $('autoBtn').addEventListener('click',toggleAuto);
+$('turboBtn').addEventListener('click',()=>setTurbo(TURBO===1));
 addEventListener('keydown',e=>{ if(e.code==='Space'&&e.target===document.body){ e.preventDefault(); $('cta').click(); } });
 if(document.fonts) document.fonts.ready.then(()=>tiles.forEach(t=>{ t.el.querySelector('.front svg').outerHTML=faceSVG(t); }));
 loadAssets().then(init);
