@@ -689,18 +689,18 @@ const LAYOUT_L = {
    Thứ tự: nhân vật -> 4 lá bài (che chân) -> khay -> board -> current win -> payout + bet */
 const LAYOUT_P = {
   homeBtn:[16,22,70,70], menuBtn:[634,24,66,66], turboBtn:[552,24,66,66],
-  host:[209,-4,302,388], result:[20,150,190,110],
-  bonus:[220,272,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus), che chân nhân vật */
-  tray:[138,498,444,100],
-  boardbox:[0,602,720,560], winline:[20,1168,680,52],
-  paypanel:[195,587,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,770) -> 660x660, chỉ hiện khi bấm PAYOUTS */
-  payBtn:[34,1292,180,62],
-  cta:[265,1226,190,190], pill:[303,1424,114,34],   /* BET ở giữa */
-  bar:[0,1500,720,40]
+  host:[163,22,393,503], result:[20,170,190,110],   /* nhân vật to hơn, lùi xuống; lá bài che từ bụng trở xuống */
+  bonus:[220,357,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus) */
+  tray:[138,583,444,100],
+  boardbox:[0,687,720,560], winline:[20,1253,680,52],
+  paypanel:[195,672,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,855) -> 660x660, chỉ hiện khi bấm PAYOUTS */
+  payBtn:[34,1377,180,62],
+  cta:[265,1311,190,190], pill:[303,1509,114,34],   /* BET ở giữa */
+  bar:[0,1585,720,40]
 };
 let LAYOUT = LAYOUT_L;
 /* Phần chiều cao dư của khung portrait (DY) chia cho: khay+board 40%, cụm dưới 80%, thanh đáy 100%. */
-const P_W=720, P_H=1540, P_MAX_H=1700;
+const P_W=720, P_H=1625, P_MAX_H=1760;
 const DY_SHARE = { tray:.4, boardbox:.4, winline:.8, paypanel:.4, payBtn:.8, cta:.8, pill:.8, bar:1 };
 const TRAY_SLOT = { w:62, h:76, gap:14 };   // vị trí 5 ô trong khay (px trong khung khay)
 // Embedded PNG crops from symbols_texture4_level1.png and the three supplied dragon faces.
