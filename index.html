@@ -211,7 +211,11 @@ button{font:inherit;color:inherit}
   background:radial-gradient(circle at 35% 35%,#fff3c4,#e2b13c 55%,#9b6c12);box-shadow:0 0 6px rgba(255,211,107,.8)}
 #rotate{position:fixed;inset:0;z-index:100;display:none;place-content:center;text-align:center;background:#0d2a0c;color:#fff;font-weight:800;font-size:18px;padding:20px}
 #rotate svg{width:70px;height:70px;margin:0 auto 12px;display:block}
-@media (orientation: portrait) and (max-width: 900px){ #rotate{display:grid} }
+/* Portrait (mobile) layout: bảng payout xếp 2 cột; vị trí các khối do LAYOUT_P quyết định */
+#stage.portrait #paytable{display:grid;grid-template-columns:1fr 1fr;column-gap:12px}
+#stage.portrait .paypanel{padding:14px 14px 8px}
+#stage.portrait #paypanel .prow{margin-bottom:6px;padding-left:12px;padding-right:8px;grid-template-columns:minmax(0,1fr) 34px 56px;column-gap:3px}
+#stage.portrait #paypanel .prow span:first-child{font-size:11.5px;line-height:1.1}
 @media (prefers-reduced-motion: reduce){ .tile,.flip,.chest{transition-duration:.01s!important} .medal.ready{animation:none} }
 
 /* Jade garden skin */
@@ -631,11 +635,27 @@ const ASSETS = {
   tile_back:'tile_back.png', slot_empty:'slot_empty.png',
   coin:'coin.png', shard:'shard.png'
 };
-const LAYOUT = {
+/* LANDSCAPE: khung 1280x720 */
+const LAYOUT_L = {
   host:[48.5,-29,242,310], paypanel:[33,143,273,425], boardbox:[316,111,648,514], tray:[418,11,444,100],
   winline:[334,624,612,52], bonus:[983,35,267,170], result:[994,227,243,110],
   cta:[1035,350,190,190], pill:[1073,556,114,34], homeBtn:[30,594,76,76], menuBtn:[1188,594,66,66], bar:[0,680,1280,40]
 };
+/* PORTRAIT (mobile): khung rộng 720, cao 1440..1700 theo tỉ lệ màn hình.
+   Thứ tự: nhân vật -> 4 lá bài (che chân) -> khay -> board -> current win -> payout + bet */
+const LAYOUT_P = {
+  homeBtn:[16,22,70,70], menuBtn:[634,24,66,66],
+  host:[239,6,242,310], result:[20,150,200,110],
+  bonus:[226,212,267,170],
+  tray:[138,396,444,100],
+  boardbox:[20,508,680,540], winline:[20,1056,680,52],
+  paypanel:[20,1124,470,232], cta:[500,1124,190,190], pill:[538,1322,114,34],
+  bar:[0,1400,720,40]
+};
+let LAYOUT = LAYOUT_L;
+/* Phần chiều cao dư của khung portrait (DY) chia cho: khay+board 40%, cụm dưới 80%, thanh đáy 100%. */
+const P_W=720, P_H=1440, P_MAX_H=1700;
+const DY_SHARE = { tray:.4, boardbox:.4, winline:.8, paypanel:.8, cta:.8, pill:.8, bar:1 };
 const TRAY_SLOT = { w:62, h:76, gap:14 };   // vị trí 5 ô trong khay (px trong khung khay)
 // Embedded PNG crops from symbols_texture4_level1.png and the three supplied dragon faces.
 const TILE_ART = {
@@ -654,8 +674,8 @@ function loadAssets(){
   })));
 }
 function skin(el,key){ if(!el||!IMG[key]) return false; el.classList.add('skin'); el.style.setProperty('--img',`url("${IMG[key]}")`); return true; }
-function applyLayout(){
-  for(const [id,[x,y,w,h]] of Object.entries(LAYOUT)){ const el=document.getElementById(id); if(el) Object.assign(el.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'}); }
+function applyLayout(dy=0){
+  for(const [id,[x,y,w,h]] of Object.entries(LAYOUT)){ const el=document.getElementById(id); if(el) Object.assign(el.style,{left:x+'px',top:(y+dy*(DY_SHARE[id]||0))+'px',width:w+'px',height:h+'px'}); }
   $('paypanel').style.height=LAYOUT.paypanel[3]+'px';
 }
 function skinRows(){ document.querySelectorAll('.prow').forEach(el=>{ if(skin(el,'paytable_row') && IMG.paytable_row_hit) el.style.setProperty('--img-hit',`url("${IMG.paytable_row_hit}")`); }); }
@@ -778,7 +798,17 @@ const bet=()=>CFG.bets[betIdx];
 const fmt=v=>v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const shuffle=a=>{ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
 
-function fit(){ const s=Math.min(innerWidth/1280, innerHeight/720); stage.style.transform=`scale(${s}) translate(-50%,-50%)`; }
+function fit(){
+  const portrait = innerHeight > innerWidth;      // màn dọc -> layout mobile, màn ngang -> layout desktop
+  let W=1280, H=720, dy=0;
+  if(portrait){ W=P_W; H=Math.min(P_MAX_H, Math.max(P_H, innerHeight*P_W/innerWidth)); dy=H-P_H; }
+  stage.classList.toggle('portrait',portrait);
+  LAYOUT = portrait ? LAYOUT_P : LAYOUT_L;
+  stage.style.width=W+'px'; stage.style.height=H+'px';
+  applyLayout(dy);
+  const s=Math.min(innerWidth/W, innerHeight/H);
+  stage.style.transform=`scale(${s}) translate(-50%,-50%)`;
+}
 addEventListener('resize',fit);
 
 function buildDeck(){
