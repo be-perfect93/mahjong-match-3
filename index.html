@@ -1124,6 +1124,7 @@ function resetTiles(){
 async function startRound(){
   if(phase!=='idle'||balance<bet()) return;
   playHost('pick');
+  stopAutoPick();
   phase='dealing'; balance-=bet(); updateHUD(); setCTA('DEALING','',false);
   highlight(null); totalWin=0; canCashOut=false; setWin(0); $('winlabel').textContent='CURRENT WIN'; setResult('','');
   closeWinPopup();
@@ -1146,7 +1147,30 @@ async function startRound(){
 function updateCTA(){
   // Chỉ cho Cash Out ngay sau khi khay đủ 5 quân và vừa ăn bộ; bốc tiếp là khóa lại
   if(canCashOut&&totalWin>0) setCTA('CASH OUT',fmt(totalWin),true,true);
-  else setCTA('PICK',`${tray.length}/${CFG.slots}`,false);
+  else setCTA('AUTO PICK',`${tray.length}/${CFG.slots}`,true,autoPick);   // bấm để tự động bốc; đang chạy thì nút nhấp nháy
+}
+
+/* ---------- Auto pick (bấm nút BET lần nữa ở lượt pick): tự bốc ngẫu nhiên trong vòng hiện tại ---------- */
+let autoPick=false, autoPickTimer=null;
+function stopAutoPick(){ autoPick=false; clearTimeout(autoPickTimer); autoPickTimer=null; }
+function autoPickTick(){
+  autoPickTimer=null;
+  if(!autoPick) return;
+  if(phase==='idle'||phase==='over'){ stopAutoPick(); return; }       // hết vòng thì dừng
+  if(phase==='pick'){
+    if(canCashOut&&totalWin>0){ stopAutoPick(); updateCTA(); return; } // vừa ăn bộ: dừng để người chơi chọn Cash Out hay bốc tiếp
+    const pool=tiles.filter(t=>!t.picked&&!t.locked);
+    if(pool.length){
+      const t=pool[Math.floor(Math.random()*pool.length)];
+      if(t.kind==='K'){ stopAutoPick(); pick(t); return; }            // gặp chìa khóa: dừng auto để người chơi tự chọn quân trong hòm
+      pick(t);
+    }
+  }
+  autoPickTimer=setTimeout(autoPickTick, reduced()?120:620);
+}
+function toggleAutoPick(){
+  if(autoPick){ stopAutoPick(); updateCTA(); return; }
+  autoPick=true; updateCTA(); autoPickTick();
 }
 function slotRect(i){ return traySlots[i].getBoundingClientRect(); }
 function fly(el, rect, keep=true, shrink=1){
@@ -1367,7 +1391,16 @@ function autoTick(){
 }
 
 /* ---------- Wiring ---------- */
-$('cta').addEventListener('click',()=>{ if(phase==='idle') startRound(); else if(phase==='pick'&&canCashOut) cashOut(); });
+$('cta').addEventListener('click',()=>{
+  if(phase==='idle') startRound();
+  else if(phase==='pick'){ if(canCashOut&&totalWin>0){ stopAutoPick(); cashOut(); } else toggleAutoPick(); }
+});
+/* Payout popup (màn dọc) */
+function setPayOpen(o){ $('paypanel').classList.toggle('open',o); $('payBackdrop').classList.toggle('open',o); $('payBtn').setAttribute('aria-expanded',o); }
+$('payBtn').addEventListener('click',()=>setPayOpen(!$('paypanel').classList.contains('open')));
+$('payClose').addEventListener('click',()=>setPayOpen(false));
+$('payBackdrop').addEventListener('click',()=>setPayOpen(false));
+addEventListener('keydown',e=>{ if(e.code==='Escape') setPayOpen(false); });
 $('betDown').addEventListener('click',()=>{ if(phase==='idle'&&betIdx>0){betIdx--; setIdle();} });
 $('betUp').addEventListener('click',()=>{ if(phase==='idle'&&betIdx<CFG.bets.length-1){betIdx++; setIdle();} });
 $('menuBtn').addEventListener('click',()=>{ const o=$('menu').classList.toggle('open'); $('menuBtn').setAttribute('aria-expanded',o); });
