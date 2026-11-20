@@ -703,7 +703,8 @@ function faceSVG(tile){
       const color=tile.n===1 ? DOT_COLORS[0] : tile.n===2 ? DOT_COLORS[1] :
         tile.n<=4 ? DOT_COLORS[2] : DOT_COLORS[(Math.floor(i/3)+tile.n)%3];
       return porcelainDot(x,y,size,color);
-    }).join('');
+    }).join('')+
+    `<text class="pip-num" x="58.5" y="72" text-anchor="end" font-family="'Barlow Condensed','Arial Narrow','Roboto Condensed',sans-serif" font-size="19" font-weight="800" fill="#7a4a30" stroke="#fff4cf" stroke-width="1.2" paint-order="stroke" opacity=".9">${tile.n}</text>`;
   } else if(tile.kind==='D'){
     const dragon=CFG.dragons[tile.d];
     const frame=`<path d="M6 20V11h9m30 0h9v9M6 53v9h9m30 0h9v-9" fill="none" stroke="${dragon.color}" stroke-width="1.5" opacity=".55"/>`;
