@@ -231,13 +231,13 @@ button{font:inherit;color:inherit}
   box-shadow:0 0 0 3px #7a1d14,0 0 0 5px #f8dd8a,0 6px 12px rgba(0,0,0,.45),inset 0 -3px 0 rgba(120,70,0,.4)}
 #stage.portrait #payBtn:active{transform:scale(.96)}
 #stage.portrait #paypanel{display:none}
-#stage.portrait #paypanel.open{display:block;z-index:80}
-#stage.portrait #payBackdrop.open{display:block;position:absolute;inset:0;z-index:79;background:rgba(0,0,0,.5)}
-#stage.portrait .pay-close{display:grid;place-items:center;position:absolute;right:-8px;top:-8px;width:44px;height:44px;border-radius:50%;
-  border:0;background:#c0261c;color:#fff;font:800 28px/1 var(--ui);cursor:pointer;z-index:2;box-shadow:0 0 0 3px #f8dd8a,0 3px 8px rgba(0,0,0,.5)}
-#stage.portrait #paytable{display:grid;grid-template-columns:1fr 1fr;column-gap:12px}
+#stage.portrait #paypanel.open{display:block;z-index:80;transform:scale(2);transform-origin:50% 50%}   /* bảng payout phóng gấp đôi */
+/* màn game phía dưới còn 70% (phủ màu nền #0d2a0c 30% = opacity 70% trên nền trang) */
+#stage.portrait #payBackdrop.open{display:block;position:absolute;inset:0;z-index:79;background:rgba(13,42,12,.3)}
+#stage.portrait .pay-close{display:grid;place-items:center;position:absolute;right:-6px;top:-6px;width:28px;height:28px;border-radius:50%;
+  border:0;background:#c0261c;color:#fff;font:800 19px/1 var(--ui);cursor:pointer;z-index:2;box-shadow:0 0 0 3px #f8dd8a,0 3px 8px rgba(0,0,0,.5)}
 #stage.portrait .paypanel{padding:14px 14px 8px}
-#stage.portrait #paypanel .prow{margin-bottom:6px;padding-left:12px;padding-right:8px;grid-template-columns:minmax(0,1fr) 34px 56px;column-gap:3px}
+#stage.portrait #paypanel .prow{margin-bottom:6px;padding-left:calc(12px + 20%);padding-right:18px;grid-template-columns:minmax(0,1fr) 34px 62px;column-gap:3px}   /* tên bộ lùi sang phải 20% */
 #stage.portrait #paypanel .prow span:first-child{font-size:11.5px;line-height:1.1}
 @media (prefers-reduced-motion: reduce){ .tile,.flip,.chest{transition-duration:.01s!important} .medal.ready{animation:none} }
 
@@ -683,17 +683,17 @@ const ASSETS = {
 const LAYOUT_L = {
   host:[48.5,-29,242,310], paypanel:[33,143,273,425], boardbox:[316,111,648,514], tray:[418,11,444,100],
   winline:[334,624,612,52], bonus:[983,35,267,170], result:[994,227,243,110],
-  cta:[1035,350,190,190], pill:[1073,556,114,34], homeBtn:[30,594,76,76], menuBtn:[1188,594,66,66], bar:[0,680,1280,40]
+  cta:[1035,350,190,190], pill:[1073,556,114,34], homeBtn:[30,594,76,76], menuBtn:[1188,594,66,66], turboBtn:[1110,596,66,66], bar:[0,680,1280,40]
 };
 /* PORTRAIT (mobile): khung rộng 720, cao 1440..1700 theo tỉ lệ màn hình.
    Thứ tự: nhân vật -> 4 lá bài (che chân) -> khay -> board -> current win -> payout + bet */
 const LAYOUT_P = {
-  homeBtn:[16,22,70,70], menuBtn:[634,24,66,66],
+  homeBtn:[16,22,70,70], menuBtn:[634,24,66,66], turboBtn:[552,24,66,66],
   host:[209,-4,302,388], result:[20,150,190,110],
   bonus:[220,272,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus), che chân nhân vật */
   tray:[138,498,444,100],
   boardbox:[0,602,720,560], winline:[20,1168,680,52],
-  paypanel:[125,690,470,232],         /* popup giữa màn hình, chỉ hiện khi bấm PAYOUTS */
+  paypanel:[195,587,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,770) -> 660x660, chỉ hiện khi bấm PAYOUTS */
   payBtn:[34,1292,180,62],
   cta:[265,1226,190,190], pill:[303,1424,114,34],   /* BET ở giữa */
   bar:[0,1500,720,40]
