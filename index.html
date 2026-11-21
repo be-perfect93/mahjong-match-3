@@ -641,8 +641,8 @@ button{font:inherit;color:inherit}
   <div class="menu" id="menu">
     <h2>How to play</h2>
     <button class="menu-auto" id="autoBtn" aria-pressed="false"><span class="dot"></span><span>Auto-play</span></button>
-    <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The locked chest covers four center tiles. Each tile flips face up when it enters the tray.</p>
-    <p>Pick the Key to open the chest and reveal four tiles you can choose from. The Key skips the tray.</p>
+    <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The locked chest covers three center tiles. Each tile flips face up when it enters the tray.</p>
+    <p>Pick the Key to open the chest and reveal three tiles you can choose from. The Key skips the tray.</p>
     <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays 0.5 times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
   </div>
 
@@ -675,7 +675,7 @@ const CFG = {
   betIndex: 1,
   cols: 8, rows: 5,            // 40 ô = 36 Trúc + Three Dragons + 1 chìa khóa (vừa khít)
   slots: 5,                    // khay 5 ô
-  chestN: 4,                   // hòm khóa cố định 4 ô giữa, chứa 4 quân
+  chestN: 3,                   // hòm khóa cố định 3 ô giữa, chứa 3 quân
   multiplierCap: 8,            // hệ số combo: x1→x2→x4→x8 rồi giữ; combo thứ k ăn 2^(k-1)
   multLevels: [1,2,4,8],       // 4 bậc hệ số, ứng với 4 lá 4 Mùa
   multSeasons: [
@@ -686,7 +686,7 @@ const CFG = {
   ],
   dotCopies: 4,
   dragons: [ {ch:'中', color:'#c0261c', name:'Red Dragon'}, {ch:'發', color:'#1d8a46', name:'Green Dragon'}, {ch:'白', color:'#2a62b8', name:'White Dragon'} ],
-  pays: { ugon:200, drag3:45, kong:18, u:6.8, pung:1.9, chow:0.5, pair:0 }
+  pays: { ugon:220, drag3:50, kong:20, u:7.5, pung:2, chow:0.5, pair:0 }   // nhắm RTP ~97% cho người chơi tối ưu với hòm 3 quân
 };
 const NAMES = { ugon:'Dragon Hand', drag3:'Three Dragons', kong:'Four of a Kind', u:'Full Hand', pung:'Three of a Kind', chow:'Straight' };
 const LONG = { ugon:'Dragon Hand (Three Dragons + Pair)', drag3:'Three Dragons', kong:'Four of a Kind (Kong)', u:'Full Hand (Three-Tile Set + Pair)', pung:'Three of a Kind (Pung)', chow:'Straight (Chow)', pair:'Single Pair', none:'No set' };
@@ -911,7 +911,7 @@ function makeGeom(mode){
   let UW,UH,chestRect;
   if(mode==='stack'){
     UW=6; UH=4.24; const raise=.12;                                    // mỗi tầng nhô cao thêm 0.12 ô để thấy độ nổi
-    for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j+2*raise,0,j===1&&i===2);   // tầng dưới: 6x4 = 24 quân (1 quân giữa nằm dưới hòm, là quân thứ 4 của hòm)
+    for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j+2*raise,0);   // tầng dưới: 6x4 = 24 quân (các quân giữa nằm dưới hòm là quân thường, lộ ra khi gỡ quân hòm)
     for(let j=0;j<3;j++) for(let i=0;i<5;i++)                          // tầng trên: 5x3 = 15 quân, mỗi quân nằm giữa 4 quân tầng dưới (so le 2 chiều)
       add(i+.5,j+.5+raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm khóa
     // Board chỉ có 39 ô: quân thứ 40 ("quân thừa") luôn là quân bắt buộc bốc đầu tiên vào khay (xem layout/startRound)
@@ -1324,7 +1324,7 @@ async function useKey(t){
   chestEl.classList.add('open');
   await sleep(300);
   chestTiles.forEach(c=>{ c.locked=false; c.revealed=true; c.el.classList.remove('down'); c.el.classList.add('lit'); });
-  setResult('','Chest open. You can pick from four revealed tiles.');
+  setResult('','Chest open. You can pick from three revealed tiles.');
   await sleep(300);
   phase='pick'; setPickable(true); updateCTA();
 }
