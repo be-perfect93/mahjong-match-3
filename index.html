@@ -854,8 +854,10 @@ function evalHand(keys){
       const pv=nums.find(x=>bam[x].length-(x===v?3:0)>=2);
       if(pv!==undefined){ cand.push({cat:'u', idx:[...bam[v].slice(0,3),...bam[pv].slice(0,2)]}); break; }
     }
-    const run=leftmostRun(bam);
-    if(run){ const used=new Set(run); const pv=nums.find(x=>bam[x].filter(i=>!used.has(i)).length>=2);
+    // Full Hand bằng sảnh: thử MỌI sảnh (không chỉ sảnh lệch trái nhất), để cùng 5 quân luôn trả Full Hand dù bốc theo thứ tự nào
+    for(let a=1;a<=7;a++){ if(!(bam[a]&&bam[a+1]&&bam[a+2])) continue;
+      const run=[bam[a][0],bam[a+1][0],bam[a+2][0]], used=new Set(run);
+      const pv=nums.find(x=>bam[x].filter(i=>!used.has(i)).length>=2);
       if(pv!==undefined) cand.push({cat:'u', idx:[...run,...bam[pv].filter(i=>!used.has(i)).slice(0,2)]}); }
   }
   for(const v of nums) if(bam[v].length>=3){ cand.push({cat:'pung', idx:bam[v].slice(0,3)}); break; }
