@@ -134,6 +134,8 @@ button{font:inherit;color:inherit}
 .win-popup.show .win-pop-flag{transform:translateY(0) scale(1)}
 .win-pop-scroll{position:absolute;left:-34px;top:-8px;width:438px;height:62px;background:url('asset/win-popup/scroll.png') center/100% 100% no-repeat;filter:drop-shadow(0 6px 6px #210605aa)}
 .win-pop-title{position:absolute;left:20px;right:20px;top:53px;width:330px;height:70px;object-fit:contain;animation:winTitleIn .55s .12s both cubic-bezier(.2,.9,.2,1.2);pointer-events:none}
+/* Mega Win: ảnh title-mega-win.png bị cắt mất chữ N ở mép phải (lỗi của ảnh gốc), nên vẽ chữ bằng SVG cho vừa khít popup */
+#winPopTitleSvg{display:none;overflow:visible}
 .win-pop-amount{position:absolute;left:35px;right:35px;top:50%;transform:translateY(-50%);text-align:center;font-family:var(--num);font-weight:900;font-size:68px;line-height:1;color:#a51f13;letter-spacing:1px;text-shadow:0 2px 0 #ffe5a1,0 4px 0 rgba(92,35,6,.25);font-variant-numeric:tabular-nums;white-space:nowrap}
 .win-pop-close{position:absolute;z-index:4;inset:0;width:100%;height:100%;border:0;background:transparent;cursor:pointer}
 @keyframes winTitleIn{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
@@ -616,6 +618,7 @@ button{font:inherit;color:inherit}
     <div class="win-pop-flag">
       <div class="win-pop-scroll" aria-hidden="true"></div>
       <img class="win-pop-title" id="winPopTitle" src="asset/win-popup/title-win.png" alt="Win">
+      <svg class="win-pop-title" id="winPopTitleSvg" viewBox="0 0 330 70" role="img" aria-label="Mega Win"><defs><linearGradient id="megaGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6a8"/><stop offset=".45" stop-color="#ffd02e"/><stop offset=".55" stop-color="#f08a10"/><stop offset="1" stop-color="#ffcf4a"/></linearGradient></defs><text x="165" y="54" text-anchor="middle" textLength="290" lengthAdjust="spacingAndGlyphs" font-family="Georgia,'Times New Roman',serif" font-weight="900" font-size="50" fill="url(#megaGold)" stroke="#7a1a10" stroke-width="7" stroke-linejoin="round" paint-order="stroke">MEGA WIN</text></svg>
 
       <div class="win-pop-amount" id="winPopAmount">0.00</div>
       <button class="win-pop-close" id="winPopClose" type="button" aria-label="Close win popup"></button>
@@ -1182,6 +1185,7 @@ function showWinPopup(multiple,amount){
   const tier=multiple<1?'win':multiple<2?'big-win':'mega-win';
   const labels={'win':'Win','big-win':'Big Win','mega-win':'Mega Win'};
   const title=$('winPopTitle');title.src=`asset/win-popup/title-${tier}.png`;title.alt=labels[tier];
+  const mega=tier==='mega-win';title.style.display=mega?'none':'';$('winPopTitleSvg').style.display=mega?'block':'none';   // Mega Win dùng chữ SVG vì ảnh gốc bị cắt
   const el=$('winPopup');$('winPopAmount').textContent=fmt(amount);
   const amountEl=$('winPopAmount');amountEl.style.fontSize='68px';
   const amountWidth=amountEl.clientWidth, renderedWidth=amountEl.scrollWidth;
