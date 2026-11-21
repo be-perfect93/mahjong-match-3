@@ -7,5 +7,9 @@
     "fullHand": 7.5,
     "threeOfAKind": 2,
     "straight": 0.5
+  },
+  "extraBet": {
+    "_note": "Extra Bet bật: mỗi ván tốn costMultiplier x cược và hòm mở sẵn từ đầu ván (key dùng ngay). Tắt: chơi như thường. Đặt 0 để ẩn nút.",
+    "costMultiplier": 1.3
   }
 }
