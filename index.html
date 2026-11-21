@@ -73,6 +73,10 @@ button{font:inherit;color:inherit}
 .tile.pickable:hover .flip{transform:rotateY(180deg) translateY(-5px)}
 .tile.pickable.lit:hover .flip{transform:translateY(-5px)}
 .tile.gone{opacity:0;pointer-events:none}
+/* board xếp chồng (màn dọc): bóng đổ giữa các tầng, quân bị đè thì tối đi */
+.board.stack .tile{filter:drop-shadow(0 4px 3px rgba(0,0,0,.55));
+  transition:left .42s cubic-bezier(.5,0,.2,1), top .42s cubic-bezier(.5,0,.2,1), opacity .3s, filter .3s}
+.board.stack .tile.covered{filter:drop-shadow(0 3px 3px rgba(0,0,0,.45)) brightness(.5) saturate(.7)}
 .tile.dim{opacity:.4}
 .flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .227s ease}
 .tile.down .flip{transform:rotateY(180deg)}
@@ -89,7 +93,7 @@ button{font:inherit;color:inherit}
 .tile.win .front.sp{box-shadow:inset 0 -6px 0 var(--ivoryEdge),0 0 0 3px var(--gold),0 0 16px #ffe27a}
 
 /* Hòm khóa */
-.chest{position:absolute;z-index:5;border-radius:10px;overflow:hidden;
+.chest{position:absolute;z-index:50;border-radius:10px;overflow:hidden;
   background:repeating-linear-gradient(90deg,rgba(0,0,0,.14) 0 2px,transparent 2px 26px),linear-gradient(180deg,#b27a40,#6d4220);
   box-shadow:inset 0 0 0 3px #3e2410,inset 0 0 0 6px #d3a45a,0 4px 12px rgba(0,0,0,.5);
   transition:opacity .5s, transform .5s}
@@ -215,6 +219,25 @@ button{font:inherit;color:inherit}
 #rotate svg{width:70px;height:70px;margin:0 auto 12px;display:block}
 /* Portrait (mobile) layout: bảng payout xếp 2 cột; vị trí các khối do LAYOUT_P quyết định */
 #stage.portrait #bonus{transform:scale(1.3);transform-origin:50% 0;z-index:2}
+/* thông báo của game (vd "Cash out now, or keep picking…") hiện như bong bóng thoại của nhân vật, đuôi chỉ về phía nhân vật */
+#stage.portrait .result{z-index:5;height:auto !important;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:12px 16px;border-radius:20px;color:#3a2410;text-shadow:none;transform:none;
+  background:linear-gradient(180deg,#fffdf2,#fbeec9);box-shadow:0 0 0 3px #d9a52c,0 8px 16px rgba(0,0,0,.4)}
+#stage.portrait .result::before,#stage.portrait .result::after{content:"";position:absolute;width:0;height:0;border-style:solid;border-color:transparent}
+#stage.portrait .result::before{right:-22px;top:28px;border-width:14px 0 14px 22px;border-left-color:#d9a52c}
+#stage.portrait .result::after{right:-17px;top:31px;border-width:11px 0 11px 18px;border-left-color:#fbeec9}
+#stage.portrait .result.empty{display:none}
+#stage.portrait .result .set{font-size:16px;min-height:0;color:#8a1f14}
+#stage.portrait .result.lose .set{color:#8a1f14}
+#stage.portrait .result .msg{font-size:15px;font-weight:700;min-height:0;margin:0;line-height:1.35;opacity:1}
+#stage.portrait .result.cashout-hint{transform:none}
+#stage.portrait .result.cashout-hint .msg{font-size:17px;font-weight:800;color:#8a1f14}
+/* board dọc: bỏ khung rồng, dùng khay gỗ để quân ra sát mép màn hình */
+#stage.portrait #boardbox{background:#382016 var(--ref-wood) center/cover no-repeat;border-radius:16px;filter:none;
+  box-shadow:inset 0 0 0 3px #9b5d27,inset 0 0 0 5px #d6a85a,0 8px 16px rgba(0,0,0,.5)}
+#stage.portrait .board,#stage.portrait .reel-gates{inset:10px}
+#stage.portrait .board{overflow:visible}
+#stage.portrait .reel-gates{overflow:hidden}
 /* số multiplier trên lá bài úp to gấp 3 (18px -> 54px), canh giữa lá bài */
 #stage.portrait #bonus .mtile:not(.current) i{inset:auto 0 12px;padding-left:22px;font:800 38px/1 var(--num);color:#fff0bd;text-shadow:0 1px 2px #200b03}
 /* dãn các lá bài ra để số to không bị lá bên cạnh che */
@@ -482,7 +505,7 @@ button{font:inherit;color:inherit}
 }
 .board,.reel-gates {inset:18px 24px}
 .reel-gates {
-  position:absolute;overflow:hidden;pointer-events:none;z-index:8;
+  position:absolute;overflow:hidden;pointer-events:none;z-index:60;   /* cửa đóng nằm trên cùng, phủ cả quân cờ và hòm */
 }
 .reel-gate {
   position:absolute;top:0;bottom:0;width:calc(50% + 2px);background-color:#352019;
@@ -689,20 +712,27 @@ const LAYOUT_L = {
    Thứ tự: nhân vật -> 4 lá bài (che chân) -> khay -> board -> current win -> payout + bet */
 const LAYOUT_P = {
   homeBtn:[16,22,70,70], menuBtn:[634,24,66,66], turboBtn:[552,24,66,66],
-  host:[163,22,393,503], result:[20,170,190,110],   /* nhân vật to hơn, lùi xuống; lá bài che từ bụng trở xuống */
-  bonus:[220,357,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus) */
-  tray:[138,583,444,100],
-  boardbox:[0,687,720,560], winline:[20,1253,680,52],
-  paypanel:[195,672,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,855) -> 660x660, chỉ hiện khi bấm PAYOUTS */
-  payBtn:[34,1377,180,62],
-  cta:[265,1311,190,190], pill:[303,1509,114,34],   /* BET ở giữa */
-  bar:[0,1585,720,40]
+  host:[180,0,360,462], result:[18,96,232,100],     /* bong bóng thoại bên trái nhân vật */    /* nhân vật; lá bài che từ bụng trở xuống */
+  bonus:[220,312,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus) */
+  tray:[20,540,680,165],            /* khay 1x5 to bằng quân cờ */
+  boardbox:[0,710,720,602], winline:[20,1316,680,52],   /* board 3 tầng so le (6x4 + 5x3 + 1), sát mép màn hình */
+  paypanel:[195,597,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,780) -> 660x660, chỉ hiện khi bấm PAYOUTS */
+  payBtn:[34,1423,140,48],
+  cta:[285,1372,150,150], pill:[572,1430,114,34],   /* BET ở giữa, PAYOUTS trái, chỉnh mức cược phải */
+  bar:[0,1550,720,40]
 };
 let LAYOUT = LAYOUT_L;
 /* Phần chiều cao dư của khung portrait (DY) chia cho: khay+board 40%, cụm dưới 80%, thanh đáy 100%. */
-const P_W=720, P_H=1625, P_MAX_H=1760;
+const P_W=720, P_H=1592, P_MAX_H=1800;
 const DY_SHARE = { tray:.4, boardbox:.4, winline:.8, paypanel:.4, payBtn:.8, cta:.8, pill:.8, bar:1 };
 const TRAY_SLOT = { w:62, h:76, gap:14 };   // vị trí 5 ô trong khay (px trong khung khay)
+const TRAY_SLOT_P = { w:116, h:137, gap:12 }; // màn dọc: ô khay to bằng quân cờ trên board
+function layoutTraySlots(){
+  const d=stage.classList.contains('portrait')?TRAY_SLOT_P:TRAY_SLOT, T=LAYOUT.tray;
+  const x0=(T[2]-(CFG.slots*d.w+(CFG.slots-1)*d.gap))/2, y0=(T[3]-d.h)/2;
+  traySlots.forEach((s,i)=>Object.assign(s.style,{left:(x0+i*(d.w+d.gap))+'px',top:y0+'px',width:d.w+'px',height:d.h+'px'}));
+  if(typeof tray!=='undefined' && tray.length) compactTray();
+}
 // Embedded PNG crops from symbols_texture4_level1.png and the three supplied dragon faces.
 const TILE_ART = {
   tile_back: 'asset/runtime-18-tile_back.png',
@@ -850,8 +880,11 @@ function fit(){
   if(portrait){ W=P_W; H=Math.min(P_MAX_H, Math.max(P_H, innerHeight*P_W/innerWidth)); dy=H-P_H; }
   stage.classList.toggle('portrait',portrait);
   LAYOUT = portrait ? LAYOUT_P : LAYOUT_L;
+  const m=modeNow();                               // đổi hướng màn hình: dựng lại board (ngay nếu đang chờ, nếu không thì đợi hết vòng)
+  if(G && m!==boardMode){ if(phase==='idle') buildBoard(m); else pendingMode=m; }
   stage.style.width=W+'px'; stage.style.height=H+'px';
   applyLayout(dy);
+  if(traySlots.length) layoutTraySlots();
   const s=Math.min(innerWidth/W, innerHeight/H);
   stage.style.transform=`scale(${s}) translate(-50%,-50%)`;
 }
@@ -864,23 +897,74 @@ function buildDeck(){
   d.push({id:id++,kind:'K',t:'K'});
   return d;
 }
-const cellPct=i=>{ const r=Math.floor(i/CFG.cols), c=i%CFG.cols; return {left:`calc(${c*100/CFG.cols}% + 2px)`, top:`calc(${r*100/CFG.rows}% + 2px)`}; };
-function placeTile(t){ Object.assign(t.el.style, cellPct(t.cell)); }
+/* ---------- Hình học board ----------
+   'grid'  (màn ngang): 8x5 phẳng, mọi quân đều bấm được.
+   'stack' (màn dọc)  : 3 tầng xếp chồng (5x4 + 4x4 lệch nửa ô + hòm 2x2). Quân bị đè thì tối và chưa bấm được,
+                        gỡ quân phía trên thì quân bên dưới sáng lên. Quân đều úp (bốc mù) nên xác suất/toán không đổi. */
+let G=null, boardMode=null, pendingMode=null;
+const modeNow=()=>innerHeight>innerWidth?'stack':'grid';
+function makeGeom(mode){
+  const slots=[], add=(x,y,l,chest)=>slots.push({idx:slots.length,x,y,l,chest:!!chest,cov:[],tile:null});
+  let UW,UH,chestRect;
+  if(mode==='stack'){
+    UW=6; UH=4.24; const raise=.12;                                    // mỗi tầng nhô cao thêm 0.12 ô để thấy độ nổi
+    for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j+2*raise,0,j===1&&i===2);   // tầng dưới: 6x4 = 24 quân (1 quân giữa nằm dưới hòm, là quân thứ 4 của hòm)
+    for(let j=0;j<3;j++) for(let i=0;i<5;i++)                          // tầng trên: 5x3 = 15 quân, mỗi quân nằm giữa 4 quân tầng dưới (so le 2 chiều)
+      add(i+.5,j+.5+raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm khóa
+    // Board chỉ có 39 ô: quân thứ 40 ("quân thừa") luôn là quân bắt buộc bốc đầu tiên vào khay (xem layout/startRound)
+    chestRect={x:1.5,y:1.62,w:3,h:1};
+  } else {
+    UW=CFG.cols; UH=CFG.rows;
+    for(let j=0;j<UH;j++) for(let i=0;i<UW;i++) add(i,j,0);
+    const r=Math.floor(UH/2), c=Math.floor((UW-CFG.chestN)/2);           // hòm cố định giữa bàn
+    for(let i=0;i<CFG.chestN;i++) slots[r*UW+c+i].chest=true;
+    chestRect={x:c,y:r,w:CFG.chestN,h:1};
+  }
+  const ov=(a,b)=>{ const w=Math.min(a.x,b.x)+1-Math.max(a.x,b.x), h=Math.min(a.y,b.y)+1-Math.max(a.y,b.y); return w>0&&h>0?w*h:0; };
+  slots.forEach(a=>slots.forEach(b=>{ if(b.l>a.l && ov(a,b)>.15) a.cov.push(b.idx); }));   // ô b nằm trên và đè lên ô a
+  return {mode,UW,UH,slots,chest:slots.filter(s=>s.chest).map(s=>s.idx),chestRect};
+}
+const slotBox=(s)=>({left:`calc(${s.x*100/G.UW}% + 2px)`, top:`calc(${s.y*100/G.UH}% + 2px)`, width:`calc(${100/G.UW}% - 4px)`, height:`calc(${100/G.UH}% - 4px)`});
+function placeTile(t){ Object.assign(t.el.style, slotBox(t.slot), {zIndex:String(t.slot.l*10+1)}); }
 function placeChest(){
-  const p=cellPct(chestCells[0]);
-  Object.assign(chestEl.style,{left:p.left, top:p.top, width:`calc(${CFG.chestN*100/CFG.cols}% - 4px)`, height:`calc(${100/CFG.rows}% - 4px)`});
+  const c=G.chestRect;
+  Object.assign(chestEl.style,{left:`calc(${c.x*100/G.UW}% + 2px)`, top:`calc(${c.y*100/G.UH}% + 2px)`, width:`calc(${c.w*100/G.UW}% - 4px)`, height:`calc(${c.h*100/G.UH}% - 4px)`});
 }
-function shuffleOutside(){
-  const n=CFG.cols*CFG.rows, free=shuffle([...Array(n).keys()].filter(i=>!chestCells.includes(i)));
-  tiles.filter(t=>!t.inChest).forEach((t,i)=>{ t.cell=free[i]; placeTile(t); });
+function buildBoard(mode){
+  boardMode=mode; pendingMode=null; G=makeGeom(mode);
+  board.classList.toggle('stack',mode==='stack');
+  board.querySelectorAll('.ghost').forEach(g=>g.remove());
+  G.slots.filter(s=>s.l===0).forEach(s=>{ const g=document.createElement('div'); g.className='ghost'; Object.assign(g.style,slotBox(s)); board.insertBefore(g,board.firstChild); });
+  document.querySelectorAll('.ghost').forEach(el=>skin(el,'slot_empty'));
+  if(tiles.length){ resetTiles(); layout(); }
 }
+/* Quân bị đè nếu còn quân (chưa bốc) ở tầng cao hơn chồng lên nó */
+function updateCovers(){
+  const live=phase!=='idle'&&phase!=='over';
+  tiles.forEach(t=>{
+    const c=!!t.slot && !t.picked && t.slot.cov.some(k=>{ const o=G.slots[k].tile; return o&&!o.picked; });
+    t.covered=c; t.el.classList.toggle('covered', c&&live);
+  });
+}
+let firstTile=null;   // "quân thừa": bộ bài nhiều hơn số ô trên board; quân này luôn được bốc vào khay đầu tiên
 function layout(){
-  const r=Math.floor(CFG.rows/2), c=Math.floor((CFG.cols-CFG.chestN)/2);   // cố định giữa bàn
-  chestCells=Array.from({length:CFG.chestN},(_,i)=>r*CFG.cols+c+i);
-  tiles.forEach(t=>{ t.inChest=false; t.locked=false; t.revealed=false; });
-  chestTiles=shuffle(tiles.filter(t=>t.kind!=='K')).slice(0,CFG.chestN);
-  chestTiles.forEach((t,i)=>{ t.inChest=true; t.locked=true; t.cell=chestCells[i]; placeTile(t); });
-  shuffleOutside(); placeChest();
+  const slots=G.slots; slots.forEach(s=>s.tile=null);
+  tiles.forEach(t=>{ t.inChest=false; t.locked=false; t.revealed=false; t.covered=false; t.slot=null; });
+  // quân thừa lấy ngẫu nhiên từ cả 40 quân đã xáo (giữ nguyên xác suất như bốc ngẫu nhiên quân đầu tiên)
+  const pool=shuffle([...tiles]);
+  firstTile=pool.splice(0,tiles.length-slots.length)[0]||null;
+  chestTiles=shuffle(pool.filter(t=>t.kind!=='K')).slice(0,CFG.chestN);
+  chestTiles.forEach((t,i)=>{ const s=slots[G.chest[i]]; t.inChest=true; t.locked=true; t.slot=s; s.tile=t; });
+  const rest=pool.filter(t=>!t.inChest), free=shuffle(slots.filter(s=>!s.chest));
+  rest.forEach((t,i)=>{ t.slot=free[i]; });
+  // chìa khóa không được nằm dưới (trực tiếp hay gián tiếp) quân trong hòm, nếu không sẽ kẹt: hòm chỉ mở được bằng chìa
+  const underChest=(s,seen=new Set())=>s.cov.some(k=>slots[k].chest || (!seen.has(k) && (seen.add(k), underChest(slots[k],seen))));
+  const key=rest.find(t=>t.kind==='K');
+  if(key && underChest(key.slot)){ const other=rest.find(t=>t!==key && !underChest(t.slot)); [key.slot,other.slot]=[other.slot,key.slot]; }
+  rest.forEach(t=>{ t.slot.tile=t; });
+  tiles.forEach(t=>{ if(t.slot) placeTile(t); });
+  if(firstTile){ Object.assign(firstTile.el.style, slotBox({x:2.5,y:1.5}), {zIndex:'55'}); firstTile.el.classList.add('gone'); }   // ẩn cho tới khi bay vào khay: xuất hiện giữa board, ngay trên hòm
+  placeChest(); updateCovers();
 }
 function makeTileEl(t){
   const b=document.createElement('button'); b.className='tile'; b.type='button';
@@ -891,14 +975,13 @@ function makeTileEl(t){
 }
 function init(){
   board.style.setProperty('--cols',CFG.cols); board.style.setProperty('--rows',CFG.rows);
-  for(let i=0;i<CFG.cols*CFG.rows;i++){ const g=document.createElement('div'); g.className='ghost'; Object.assign(g.style,cellPct(i)); board.appendChild(g); }
   tiles=buildDeck(); tiles.forEach(t=>{ t.el=makeTileEl(t); board.appendChild(t.el); });
   chestEl=document.createElement('div'); chestEl.className='chest'; chestEl.id='chest';
   chestEl.innerHTML=`<svg class="lock" viewBox="0 0 46 56" aria-hidden="true"><path d="M11 24V16a12 12 0 0 1 24 0v8" fill="none" stroke="#f2c672" stroke-width="6" stroke-linecap="round"/><rect x="4" y="22" width="38" height="30" rx="6" fill="#d9a52c" stroke="#7a4f10" stroke-width="2.5"/><circle cx="23" cy="35" r="4.5" fill="#5a3a08"/><rect x="21.2" y="37" width="3.6" height="9" rx="1.8" fill="#5a3a08"/></svg>`;
   board.appendChild(chestEl);
-  const x0=(LAYOUT.tray[2]-(CFG.slots*TRAY_SLOT.w+(CFG.slots-1)*TRAY_SLOT.gap))/2, y0=(LAYOUT.tray[3]-TRAY_SLOT.h)/2;
-  for(let i=0;i<CFG.slots;i++){ const s=document.createElement('div'); s.className='tslot';
-    Object.assign(s.style,{left:(x0+i*(TRAY_SLOT.w+TRAY_SLOT.gap))+'px',top:y0+'px',width:TRAY_SLOT.w+'px',height:TRAY_SLOT.h+'px'}); trayEl.appendChild(s); traySlots.push(s); }
+  buildBoard(modeNow());
+  for(let i=0;i<CFG.slots;i++){ const s=document.createElement('div'); s.className='tslot'; trayEl.appendChild(s); traySlots.push(s); }
+  layoutTraySlots();
   buildMultTrack(); layout(); renderPaytable(); applyLayout(); applySkins(); fit(); setIdle();
 }
 function renderPaytable(){
@@ -1056,9 +1139,9 @@ Promise.all(Object.values(SK).flatMap(s=>Object.values(s.images).map(im=>new Pro
 return function(event){if(event==='pick'){go('idle');return;}if(event==='crash'){celebrating=false;go('sulk');return;}celebrating=true;hold=event==='cashout'?2.15:1.7;go('active');};
 })();
 function setWin(v){ $('winv').textContent=fmt(v); }
-function setResult(set,msg,cls=''){ $('rset').textContent=set||''; $('rmsg').textContent=msg||''; $('result').className='result '+cls; }
+function setResult(set,msg,cls=''){ $('rset').textContent=set||''; $('rmsg').textContent=msg||''; $('result').className='result '+cls+((set||msg)?'':' empty'); }
 function setCTA(k,s,enabled,ready=false){ $('ctaK').textContent=k; $('ctaS').textContent=s; $('cta').disabled=!enabled; $('cta').classList.toggle('ready',enabled&&ready); }
-function setPickable(on){ tiles.forEach(t=>t.el.classList.toggle('pickable', on && !t.picked && !t.locked)); }
+function setPickable(on){ updateCovers(); tiles.forEach(t=>t.el.classList.toggle('pickable', on && !t.picked && !t.locked && !t.covered)); }
 function buildMultTrack(){
   $('mtrack').innerHTML = CFG.multLevels.map((m,i)=>{
     const sea=CFG.multSeasons[i];
@@ -1125,7 +1208,7 @@ function burstToWin(){
   }
 }
 function setIdle(){
-  phase='idle'; setPickable(false); updateHUD(); renderPaytable();
+  phase='idle'; if(pendingMode&&pendingMode!==boardMode) buildBoard(pendingMode); setPickable(false); updateHUD(); renderPaytable();
   if(balance<bet()){ setCTA('BET',fmt(bet()),false); setResult('','Insufficient balance. Lower your bet.'); }
   else setCTA('BET',fmt(bet()),true,true);
 }
@@ -1135,11 +1218,11 @@ function resetTiles(){
   tray=[]; trayEl.classList.remove('win');
   tiles.forEach(t=>{
     t.picked=false; t.revealed=false; t.locked=false;
-    t.el.classList.remove('gone','win','dim','lit','pickable');
-    ['width','height','left','top'].forEach(p=>t.el.style[p]='');
+    t.el.classList.remove('gone','win','dim','lit','pickable','covered');
+    ['width','height','left','top','zIndex'].forEach(p=>t.el.style[p]='');
     board.appendChild(t.el);
   });
-  tiles.forEach(placeTile);
+  tiles.forEach(t=>{ if(t.slot) placeTile(t); });
 }
 async function startRound(){
   if(phase!=='idle'||balance<bet()) return;
@@ -1163,6 +1246,7 @@ async function startRound(){
   await sleep(440);
   phase='pick'; setPickable(true); updateCTA();
   setResult('','Pick tiles to fill the tray. Keep picking after a set clears, or cash out to end the round.');
+  if(firstTile){ const t=firstTile; firstTile=null; t.el.classList.remove('gone'); await pick(t); }   // quân thừa luôn vào khay đầu tiên (nếu là chìa khóa thì mở hòm luôn)
 }
 function updateCTA(){
   // Chỉ cho Cash Out ngay sau khi khay đủ 5 quân và vừa ăn bộ; bốc tiếp là khóa lại
@@ -1179,7 +1263,7 @@ function autoPickTick(){
   if(phase==='idle'||phase==='over'){ stopAutoPick(); return; }       // hết vòng thì dừng
   if(phase==='pick'){
     if(canCashOut&&totalWin>0){ stopAutoPick(); updateCTA(); return; } // vừa ăn bộ: dừng để người chơi chọn Cash Out hay bốc tiếp
-    const pool=tiles.filter(t=>!t.picked&&!t.locked);
+    const pool=tiles.filter(t=>!t.picked&&!t.locked&&!t.covered);
     if(pool.length){
       const t=pool[Math.floor(Math.random()*pool.length)];
       if(t.kind==='K'){ stopAutoPick(); pick(t); return; }            // gặp chìa khóa: dừng auto để người chơi tự chọn quân trong hòm
@@ -1214,7 +1298,7 @@ function putInTray(t,i){
   t.el.classList.remove('pickable','gone'); trayEl.appendChild(t.el);
 }
 async function pick(t){
-  if(phase!=='pick'||t.picked||t.locked) return;
+  if(phase!=='pick'||t.picked||t.locked||t.covered) return;
   phase='busy'; setPickable(false);
   canCashOut=false; updateCTA();                    // bốc tiếp -> quay lại state pick, khóa nút
   if(t.kind==='K'){ await useKey(t); return; }
@@ -1247,7 +1331,7 @@ async function cashOut(){
     await endRound('You cashed out');
   }
 }
-function boardHasPickable(){ return tiles.some(t=>!t.picked&&!t.locked&&t.kind!=='K'); }
+function boardHasPickable(){ updateCovers(); return tiles.some(t=>!t.picked&&!t.locked&&!t.covered); }   // chìa khóa cũng tính: bốc nó mở hòm, lộ thêm quân
 function compactTray(){
   tray.forEach((t,i)=>{ const sl=traySlots[i];
     Object.assign(t.el.style,{left:sl.offsetLeft+'px',top:sl.offsetTop+'px',width:sl.offsetWidth+'px',height:sl.offsetHeight+'px'}); });
@@ -1378,7 +1462,7 @@ function countTo(el,from,to,dur){
 }
 async function revealAll(){
   if(!chestEl.classList.contains('open')) chestEl.classList.add('open');
-  tiles.filter(t=>!t.picked).forEach(t=>{ const r=Math.floor(t.cell/CFG.cols), c=t.cell%CFG.cols; setTimeout(()=>{ t.el.classList.remove('down','lit'); }, reduced()?0:(r+c)*35); });
+  tiles.filter(t=>!t.picked).forEach(t=>{ const r=Math.floor(t.slot?t.slot.y:1), c=Math.floor(t.slot?t.slot.x:2); setTimeout(()=>{ t.el.classList.remove('down','lit'); }, reduced()?0:(r+c)*35); });
   await sleep(11*35+400);
 }
 function coins(fromEl,toEl){
@@ -1404,7 +1488,7 @@ function autoTick(){
     if(balance>=bet()) startRound();
     else { autoPlay=false; setAutoBtn(); return; }   // hết tiền thì dừng tự động
   } else if(phase==='pick'){
-    const pool=tiles.filter(t=>!t.picked&&!t.locked);   // gồm chìa khóa + quân đã lộ từ hòm
+    const pool=tiles.filter(t=>!t.picked&&!t.locked&&!t.covered);   // gồm chìa khóa + quân đã lộ từ hòm, bỏ quân đang bị đè
     if(pool.length) pick(pool[Math.floor(Math.random()*pool.length)]);
   }
   autoTimer=setTimeout(autoTick, reduced()?120:620);
