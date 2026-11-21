@@ -466,12 +466,12 @@ button{font:inherit;color:inherit}
 --ref-reel-frame:url('asset/runtime-16-reel-frame.png');
 }
 
-/* Gold at the start of each round, then amber, copper and ember. */
-@property --back-light {syntax:"<color>";inherits:true;initial-value:#ffe889}
-@property --back-accent {syntax:"<color>";inherits:true;initial-value:#ffd03d}
-@property --back-edge {syntax:"<color>";inherits:true;initial-value:#56330c}
+/* Green (Spring) at the start, then pink (Summer), amber (Autumn) and blue (Winter). */
+@property --back-light {syntax:"<color>";inherits:true;initial-value:#e4ed9a}
+@property --back-accent {syntax:"<color>";inherits:true;initial-value:#b8cf4a}
+@property --back-edge {syntax:"<color>";inherits:true;initial-value:#263d1c}
 #stage {
-  --back-base:#b58a20;--back-light:#ffe889;--back-accent:#ffd03d;--back-edge:#56330c;
+  --back-base:#567b36;--back-light:#e4ed9a;--back-accent:#b8cf4a;--back-edge:#263d1c;   /* mặc định = Spring (xanh lá), trước khi vào ván đầu tiên */
   isolation:isolate;
   background:var(--back-base);
   transition:background-color .65s ease, --back-light .65s ease, --back-accent .65s ease, --back-edge .65s ease;
@@ -480,8 +480,8 @@ button{font:inherit;color:inherit}
 #stage[data-combo="4"] {--back-base:#a64322;--back-light:#ffbd6c;--back-accent:#fe831f;--back-edge:#521c12}
 #stage[data-combo="8"] {--back-base:#8a291d;--back-light:#ff935e;--back-accent:#ee5d23;--back-edge:#44101b}
 /* Backdrop palette follows the Spring, Summer, Autumn and Winter cards. */
-#stage[data-season="spring"] {--back-base:#80505f;--back-light:#ffd5e4;--back-accent:#e879a2;--back-edge:#422532}
-#stage[data-season="summer"] {--back-base:#567b36;--back-light:#e4ed9a;--back-accent:#b8cf4a;--back-edge:#263d1c}
+#stage[data-season="spring"] {--back-base:#567b36;--back-light:#e4ed9a;--back-accent:#b8cf4a;--back-edge:#263d1c}
+#stage[data-season="summer"] {--back-base:#80505f;--back-light:#ffd5e4;--back-accent:#e879a2;--back-edge:#422532}
 #stage[data-season="autumn"] {--back-base:#9a4e20;--back-light:#ffd28b;--back-accent:#ed852c;--back-edge:#4e2412}
 #stage[data-season="winter"] {--back-base:#31577e;--back-light:#d5edff;--back-accent:#67b7e8;--back-edge:#172c4e}
 #stage::before {
