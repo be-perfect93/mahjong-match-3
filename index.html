@@ -643,7 +643,7 @@ button{font:inherit;color:inherit}
     <button class="menu-auto" id="autoBtn" aria-pressed="false"><span class="dot"></span><span>Auto-play</span></button>
     <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The locked chest covers three center tiles. Each tile flips face up when it enters the tray.</p>
     <p>Pick the Key to open the chest and reveal three tiles you can choose from. The Key skips the tray.</p>
-    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays 0.5 times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
+    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays <span id="straightPay">0.5</span> times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
   </div>
 
   <div class="bar" id="bar"><div>Balance:<b id="bal">0</b></div><div>Bet:<b id="betbar">1.00</b></div><div>Win:<b id="last">0.00</b></div></div>
@@ -1230,7 +1230,7 @@ function resetTiles(){
 }
 async function startRound(){
   if(phase!=='idle'||balance<bet()) return;
-  playHost('pick');
+  playHost('pick'); sfx('bet'); sfx('start');
   stopAutoPick();
   phase='dealing'; balance-=bet(); updateHUD(); setCTA('DEALING','',false);
   highlight(null); totalWin=0; canCashOut=false; setWin(0); $('winlabel').textContent='CURRENT WIN'; setResult('','');
@@ -1297,6 +1297,7 @@ function fly(el, rect, keep=true, shrink=1){
   });
 }
 function putInTray(t,i){
+  sfx('flyup');   // quân vừa chạm vào ô khay 1×5
   const s=traySlots[i];
   Object.assign(t.el.style,{width:s.offsetWidth+'px',height:s.offsetHeight+'px',left:s.offsetLeft+'px',top:s.offsetTop+'px'});
   t.el.classList.remove('pickable','gone'); trayEl.appendChild(t.el);
@@ -1317,7 +1318,7 @@ async function pick(t){
 }
 async function useKey(t){
   t.picked=true; t.el.classList.remove('down');
-  setResult('','Key found. Opening the chest…');
+  setResult('','Key found. Opening the chest…'); sfx('key');
   await sleep(367);
   const cr=chestEl.getBoundingClientRect();
   await fly(t.el, {left:cr.left+cr.width/2-8,top:cr.top+cr.height/2-10,width:16,height:20}, false, .6);
@@ -1330,7 +1331,7 @@ async function useKey(t){
 }
 async function cashOut(){
   if(phase==='pick'&&canCashOut&&totalWin>0){
-    playHost('cashout');
+    playHost('cashout'); sfx('cashout');
     await showWinPopup(totalWin/bet(),totalWin);
     await endRound('You cashed out');
   }
@@ -1421,7 +1422,7 @@ async function cascadeResolve(){
       highlight(res.cat);
       setResult(LONG[res.cat], usedMult>1 ? `x${base} × combo x${usedMult}  =  +${fmt(win)}` : `x${base}  =  +${fmt(win)}`);
       const from=totalWin; totalWin=+(totalWin+win).toFixed(2);
-      playHost('combo');
+      playHost('combo'); sfx('combo');
       countTo($('winv'),from,totalWin,460); coins(trayEl,$('winv'));
       if(winTiles.length===3){
         await smashCombo(winTiles,'#ffd66a');
@@ -1446,6 +1447,7 @@ async function cascadeResolve(){
   canCashOut=totalWin>0;
   phase='pick'; setPickable(true); updateCTA();
   setResult('', canCashOut ? 'Cash out now, or keep picking to fill the tray again.' : 'Fill the empty slots to make a set.', canCashOut ? 'cashout-hint' : '');
+  if(canCashOut) sfx('option');   // đúng lúc hiện "Cash out now, or keep picking…"
 }
 async function endRound(reason){
   phase='over'; setPickable(false); setCTA('…','',false); highlight(null);
@@ -1455,7 +1457,7 @@ async function endRound(reason){
     coins(trayEl,$('bal'));
     await countTo($('bal'),balance,balance+totalWin,750); balance+=totalWin; $('last').textContent=fmt(totalWin);
   } else {
-    playHost('crash');
+    playHost('crash'); sfx('end');
     setResult('No set', reason, 'lose'); $('last').textContent=fmt(0); await sleep(500);
   }
   await revealAll(); setIdle();
@@ -1517,7 +1519,39 @@ $('autoBtn').addEventListener('click',toggleAuto);
 $('turboBtn').addEventListener('click',()=>setTurbo(TURBO===1));
 addEventListener('keydown',e=>{ if(e.code==='Space'&&e.target===document.body){ e.preventDefault(); $('cta').click(); } });
 if(document.fonts) document.fonts.ready.then(()=>tiles.forEach(t=>{ t.el.querySelector('.front svg').outerHTML=faceSVG(t); }));
-loadAssets().then(init);
+/* ---------- Âm thanh: thư mục sound/ ----------
+   BGM lặp vòng, bắt đầu ở cú chạm/phím đầu tiên (trình duyệt chặn autoplay trước khi có tương tác).
+   Hiệu ứng: combo (ăn bộ), cashout, key (mở hòm). Không có crash. Thiếu file thì bỏ qua, không báo lỗi. */
+const SOUND = { bgm:'sound/bgm.mp3', key:'sound/key.mp3', combo:'sound/combo.mp3', cashout:'sound/cashout.mp3', bet:'sound/bet.mp3', flyup:'sound/flyup.mp3', start:'sound/start.mp3', option:'sound/option.mp3', end:'sound/end.mp3' };
+const AUDIO = {};
+for(const [k,src] of Object.entries(SOUND)){ try{ const a=new Audio(src); a.preload='auto'; a.volume = k==='bgm'?0.35:0.8; AUDIO[k]=a; }catch(e){} }
+if(AUDIO.bgm){ AUDIO.bgm.loop=true; }
+function sfx(name){
+  const a=AUDIO[name]; if(!a) return;
+  try{ const c=a.cloneNode(); c.volume=a.volume; c.play().catch(()=>{}); }catch(e){}   // clone để hai hiệu ứng có thể chồng nhau
+}
+function startBgm(){ if(AUDIO.bgm) AUDIO.bgm.play().catch(()=>{}); }
+addEventListener('pointerdown', startBgm, {once:true});
+addEventListener('keydown', startBgm, {once:true});
+
+/* ---------- config.json: payout chỉnh từ file ngoài ----------
+   Cần mở game qua web server (vd: http-server) — trình duyệt chặn đọc file JSON khi mở trực tiếp file://.
+   Không đọc được hoặc giá trị sai thì giữ bảng mặc định trong CFG.pays. */
+const CONFIG_KEYS = { dragonHand:'ugon', threeDragons:'drag3', fourOfAKind:'kong', fullHand:'u', threeOfAKind:'pung', straight:'chow' };
+async function loadConfig(){
+  try{
+    const r = await fetch('config.json', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const p = (await r.json()).payouts || {};
+    for(const [name,k] of Object.entries(CONFIG_KEYS)){
+      if(!(name in p)) continue;
+      const v = Number(p[name]);
+      if(Number.isFinite(v) && v>=0) CFG.pays[k]=v; else console.warn(`config.json: payouts.${name} không hợp lệ (${p[name]}), giữ ${CFG.pays[k]}`);
+    }
+  }catch(e){ console.warn('Không đọc được config.json, dùng payout mặc định:', e.message); }
+  const s=document.getElementById('straightPay'); if(s) s.textContent=CFG.pays.chow;
+}
+Promise.all([loadAssets(), loadConfig()]).then(init);
 </script>
 </body>
 </html>

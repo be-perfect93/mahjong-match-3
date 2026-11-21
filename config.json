@@ -1,0 +1,11 @@
+{
+  "_readme": "Hệ số trả thưởng tính theo x tiền cược (trước khi nhân hệ số combo). Sửa số rồi tải lại trang. Giữ nguyên tên khóa; số phải >= 0.",
+  "payouts": {
+    "dragonHand": 220,
+    "threeDragons": 50,
+    "fourOfAKind": 20,
+    "fullHand": 7.5,
+    "threeOfAKind": 2,
+    "straight": 0.5
+  }
+}
