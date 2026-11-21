@@ -652,9 +652,9 @@ button{font:inherit;color:inherit}
 
 <script>
 /* ================= TURBO =================
-   Bật Turbo: mọi animation/timer của game chạy nhanh hơn 50% (TURBO_RATE = 1.5).
+   Bật Turbo: mọi animation/timer của game chạy nhanh gấp 3 (TURBO_RATE = 3).
    Gói lại setTimeout, Element.animate, CSS transition/animation, countTo và vòng lặp nhân vật. */
-var TURBO=1; const TURBO_RATE=1.5;
+var TURBO=1; const TURBO_RATE=3;
 (()=>{
   const _setTimeout=window.setTimeout.bind(window), _animate=Element.prototype.animate;
   window.setTimeout=(fn,ms,...a)=>_setTimeout(fn,(+ms||0)/TURBO,...a);
