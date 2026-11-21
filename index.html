@@ -878,7 +878,7 @@ const fmt=v=>v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDi
 const shuffle=a=>{ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
 
 function fit(){
-  const portrait = innerHeight > innerWidth;      // màn dọc -> layout mobile, màn ngang -> layout desktop
+  const portrait = true;                          // luôn dùng layout dọc (mobile); đã ẩn layout màn ngang
   let W=1280, H=720, dy=0;
   if(portrait){ W=P_W; H=Math.min(P_MAX_H, Math.max(P_H, innerHeight*P_W/innerWidth)); dy=H-P_H; }
   stage.classList.toggle('portrait',portrait);
@@ -905,7 +905,7 @@ function buildDeck(){
    'stack' (màn dọc)  : 3 tầng xếp chồng (5x4 + 4x4 lệch nửa ô + hòm 2x2). Quân bị đè thì tối và chưa bấm được,
                         gỡ quân phía trên thì quân bên dưới sáng lên. Quân đều úp (bốc mù) nên xác suất/toán không đổi. */
 let G=null, boardMode=null, pendingMode=null;
-const modeNow=()=>innerHeight>innerWidth?'stack':'grid';
+const modeNow=()=>'stack';   // luôn dùng board xếp chồng; board 'grid' (màn ngang) đã ẩn
 function makeGeom(mode){
   const slots=[], add=(x,y,l,chest)=>slots.push({idx:slots.length,x,y,l,chest:!!chest,cov:[],tile:null});
   let UW,UH,chestRect;
