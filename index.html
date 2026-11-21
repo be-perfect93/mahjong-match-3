@@ -659,9 +659,10 @@ button{font:inherit;color:inherit}
   <div class="menu" id="menu">
     <h2>How to play</h2>
     <button class="menu-auto" id="autoBtn" aria-pressed="false"><span class="dot"></span><span>Auto-play</span></button>
+    <button class="menu-auto on" id="soundBtn" aria-pressed="true"><span class="dot"></span><span>Sound</span></button>
     <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The locked chest covers three center tiles. Each tile flips face up when it enters the tray.</p>
     <p>Pick the Key to open the chest and reveal three tiles you can choose from. The Key skips the tray.</p>
-    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays <span id="straightPay">0.5</span> times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
+    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays <span id="straightPay">0.5</span> times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Extra Bet: switch it on to pay <span id="extraCostTxt">1.3</span> times your bet each round and start with the chest already open. Wins still pay on your normal bet. Switch it off to play as usual.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
   </div>
 
   <div class="bar" id="bar"><div>Balance:<b id="bal">0</b></div><div>Bet:<b id="betbar">1.00</b></div><div>Win:<b id="last">0.00</b></div></div>
@@ -1557,6 +1558,7 @@ $('betUp').addEventListener('click',()=>{ if(phase==='idle'&&betIdx<CFG.bets.len
 $('menuBtn').addEventListener('click',()=>{ const o=$('menu').classList.toggle('open'); $('menuBtn').setAttribute('aria-expanded',o); });
 $('homeBtn').addEventListener('click',()=>{ $('menu').classList.remove('open'); if(autoPlay) toggleAuto(); });
 $('autoBtn').addEventListener('click',toggleAuto);
+$('soundBtn').addEventListener('click',()=>setSound(!soundOn));
 $('turboBtn').addEventListener('click',()=>setTurbo(TURBO===1));
 addEventListener('keydown',e=>{ if(e.code==='Space'&&e.target===document.body){ e.preventDefault(); $('cta').click(); } });
 if(document.fonts) document.fonts.ready.then(()=>tiles.forEach(t=>{ t.el.querySelector('.front svg').outerHTML=faceSVG(t); }));
@@ -1567,13 +1569,23 @@ const SOUND = { bgm:'sound/bgm.mp3', key:'sound/key.mp3', combo:'sound/combo.mp3
 const AUDIO = {};
 for(const [k,src] of Object.entries(SOUND)){ try{ const a=new Audio(src); a.preload='auto'; a.volume = k==='bgm'?0.35:0.8; AUDIO[k]=a; }catch(e){} }
 if(AUDIO.bgm){ AUDIO.bgm.loop=true; }
+/* Nút Sound trong menu burger: tắt/bật toàn bộ âm thanh (BGM + hiệu ứng), nhớ lựa chọn lần sau */
+let soundOn=true;
+try{ soundOn = localStorage.getItem('soundOn')!=='0'; }catch(e){}
 function sfx(name){
+  if(!soundOn) return;
   const a=AUDIO[name]; if(!a) return;
   try{ const c=a.cloneNode(); c.volume=a.volume; c.play().catch(()=>{}); }catch(e){}   // clone để hai hiệu ứng có thể chồng nhau
 }
-function startBgm(){ if(AUDIO.bgm) AUDIO.bgm.play().catch(()=>{}); }
+function startBgm(){ if(soundOn && AUDIO.bgm) AUDIO.bgm.play().catch(()=>{}); }
 addEventListener('pointerdown', startBgm, {once:true});
 addEventListener('keydown', startBgm, {once:true});
+function setSound(on){
+  soundOn=on; try{ localStorage.setItem('soundOn', on?'1':'0'); }catch(e){}
+  const b=document.getElementById('soundBtn'); if(b){ b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }
+  if(AUDIO.bgm){ if(on) AUDIO.bgm.play().catch(()=>{}); else AUDIO.bgm.pause(); }
+}
+document.addEventListener('DOMContentLoaded',()=>setSound(soundOn));
 
 /* ---------- config.json: payout chỉnh từ file ngoài ----------
    Cần mở game qua web server (vd: http-server) — trình duyệt chặn đọc file JSON khi mở trực tiếp file://.
