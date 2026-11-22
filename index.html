@@ -1027,7 +1027,7 @@ function updateHUD(){
   updateExtra();
 }
 /* ---------- Extra Bet: công tắc bật/tắt (chỉ đổi được khi chưa vào ván). Bật = mỗi ván tốn extraBetCost x cược, hòm mở sẵn. Tắt = game như cũ. ---------- */
-let extraBet=false;
+let extraBet=true;   // mặc định BẬT khi mở game; người chơi tắt bằng công tắc
 const roundCost=()=> extraBet ? +(bet()*CFG.extraBetCost).toFixed(2) : bet();
 function updateExtra(){
   const b=$('extraBtn'); if(!b) return;
