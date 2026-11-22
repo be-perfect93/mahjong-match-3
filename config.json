@@ -1,15 +1,11 @@
 {
   "_readme": "Hệ số trả thưởng tính theo x tiền cược (trước khi nhân hệ số combo). Sửa số rồi tải lại trang. Giữ nguyên tên khóa; số phải >= 0.",
   "payouts": {
-    "dragonHand": 220,
-    "threeDragons": 50,
-    "fourOfAKind": 20,
-    "fullHand": 7.5,
-    "threeOfAKind": 2,
-    "straight": 0.5
-  },
-  "extraBet": {
-    "_note": "Extra Bet bật: mỗi ván tốn costMultiplier x cược và hòm mở sẵn từ đầu ván (key dùng ngay). Tắt: chơi như thường. Đặt 0 để ẩn nút.",
-    "costMultiplier": 1.3
+    "dragonHand": 150,
+    "threeDragons": 30,
+    "fourOfAKind": 15,
+    "fullHand": 5,
+    "threeOfAKind": 1.5,
+    "straight": 0.3
   }
 }

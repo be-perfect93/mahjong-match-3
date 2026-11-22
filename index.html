@@ -255,23 +255,6 @@ button{font:inherit;color:inherit}
   background:linear-gradient(180deg,#fff0a8,#f2c94c 45%,#d9a52c 55%,#f4cf61);
   box-shadow:0 0 0 3px #7a1d14,0 0 0 5px #f8dd8a,0 6px 12px rgba(0,0,0,.45),inset 0 -3px 0 rgba(120,70,0,.4)}
 #stage.portrait #payBtn:active{transform:scale(.96)}
-/* EXTRA BET: công tắc bật/tắt. Bật = mỗi ván tốn extraBet.costMultiplier x cược và hòm mở sẵn từ đầu ván */
-#extraBtn{display:none}
-#stage.portrait #extraBtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;position:absolute;z-index:3;padding:0;border:0;border-radius:16px;cursor:pointer;
-  font:800 18px/1 var(--num);letter-spacing:.5px;color:#fff;
-  background:linear-gradient(180deg,#5b2a22,#3a1812);
-  box-shadow:0 0 0 2px #1d0a07,0 0 0 4px #c9a24a,0 5px 10px rgba(0,0,0,.45)}
-#stage.portrait #extraBtn .eb-k{color:#ffe9a8;text-shadow:0 1px 2px #200b03}
-#stage.portrait #extraBtn .eb-track{position:relative;display:block;width:86px;height:40px;border-radius:20px;background:#4a4a4a;
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.6),0 0 0 2px #1d0a07;transition:background .2s}
-#stage.portrait #extraBtn .eb-knob{position:absolute;left:4px;top:4px;width:32px;height:32px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#fff,#d8d8d8 60%,#a8a8a8);box-shadow:0 2px 4px rgba(0,0,0,.5);transition:transform .2s}
-#stage.portrait #extraBtn .eb-state{position:absolute;right:11px;top:0;line-height:40px;font:800 16px/40px var(--num);font-style:normal;color:#d0d0d0}
-#stage.portrait #extraBtn.on .eb-track{background:linear-gradient(180deg,#46d36b,#1d8a46);box-shadow:inset 0 2px 5px rgba(0,0,0,.35),0 0 0 2px #1d0a07,0 0 12px #6dff9a}
-#stage.portrait #extraBtn.on .eb-knob{transform:translateX(46px)}
-#stage.portrait #extraBtn.on .eb-state{right:auto;left:13px;color:#fff}
-#stage.portrait #extraBtn:active:not(:disabled){transform:scale(.96)}
-#stage.portrait #extraBtn:disabled{filter:grayscale(.5) brightness(.8);cursor:default}
 #stage.portrait #paypanel{display:none}
 #stage.portrait #paypanel.open{display:block;z-index:80;transform:scale(2);transform-origin:50% 50%}   /* bảng payout phóng gấp đôi */
 /* màn game phía dưới còn 70% (phủ màu nền #0d2a0c 30% = opacity 70% trên nền trang) */
@@ -626,7 +609,6 @@ button{font:inherit;color:inherit}
     <div id="paytable"></div>
   </section>
   <button id="payBtn" type="button" aria-expanded="false" aria-controls="paypanel">PAYOUTS</button>
-  <button id="extraBtn" type="button" role="switch" aria-checked="false" aria-label="Extra bet"><span class="eb-k" id="extraK">EXTRA BET (1.3X)</span><span class="eb-track"><i class="eb-knob"></i><em class="eb-state" id="extraState">OFF</em></span></button>
 
   <div class="boardbox" id="boardbox"><div class="board" id="board" role="grid" aria-label="Tile board"></div><div class="reel-gates" id="reelGates" aria-hidden="true"><span class="reel-gate left"></span><span class="reel-gate right"></span></div></div>
   <div class="tray" id="tray" aria-label="Five-slot tray"></div>
@@ -660,9 +642,9 @@ button{font:inherit;color:inherit}
     <h2>How to play</h2>
     <button class="menu-auto" id="autoBtn" aria-pressed="false"><span class="dot"></span><span>Auto-play</span></button>
     <button class="menu-auto on" id="soundBtn" aria-pressed="true"><span class="dot"></span><span>Sound</span></button>
-    <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The locked chest covers three center tiles. Each tile flips face up when it enters the tray.</p>
-    <p>Pick the Key to open the chest and reveal three tiles you can choose from. The Key skips the tray.</p>
-    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays <span id="straightPay">0.5</span> times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Extra Bet: switch it on to pay <span id="extraCostTxt">1.3</span> times your bet each round and start with the chest already open. Wins still pay on your normal bet. Switch it off to play as usual.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
+    <p>The 8 × 5 board holds 36 Dot tiles, three Dragons and one Key. The chest in the center holds three tiles and starts open, so you can see them from the beginning. Each tile flips face up when it enters the tray.</p>
+    <p>You can pick the three chest tiles at any time. The Key is used automatically and skips the tray.</p>
+    <p>Fill the five-slot tray to check for a set. A set clears and frees space for more picks. A straight pays <span id="straightPay">0.5</span> times the bet before the combo multiplier. The round ends when no set can be formed or you cash out.</p><p>The combo multiplier starts at ×1 each round. Each paying set doubles the multiplier for the next set, up to ×8.</p><p>Auto-play picks tiles at random and starts new rounds until you turn it off or run out of balance.</p>
   </div>
 
   <div class="bar" id="bar"><div>Balance:<b id="bal">0</b></div><div>Bet:<b id="betbar">1.00</b></div><div>Win:<b id="last">0.00</b></div></div>
@@ -694,7 +676,7 @@ const CFG = {
   betIndex: 1,
   cols: 8, rows: 5,            // 40 ô = 36 Trúc + Three Dragons + 1 chìa khóa (vừa khít)
   slots: 5,                    // khay 5 ô
-  chestN: 3,                   // hòm khóa cố định 3 ô giữa, chứa 3 quân
+  chestN: 3,                   // hòm chứa 3 quân, mở sẵn từ đầu ván (key là quân thừa, dùng ngay)
   multiplierCap: 8,            // hệ số combo: x1→x2→x4→x8 rồi giữ; combo thứ k ăn 2^(k-1)
   multLevels: [1,2,4,8],       // 4 bậc hệ số, ứng với 4 lá 4 Mùa
   multSeasons: [
@@ -705,8 +687,7 @@ const CFG = {
   ],
   dotCopies: 4,
   dragons: [ {ch:'中', color:'#c0261c', name:'Red Dragon'}, {ch:'發', color:'#1d8a46', name:'Green Dragon'}, {ch:'白', color:'#2a62b8', name:'White Dragon'} ],
-  extraBetCost: 1.3,           // Extra Bet bật: mỗi ván tốn extraBetCost x cược, hòm mở sẵn từ đầu ván (chỉnh trong config.json)
-  pays: { ugon:220, drag3:50, kong:20, u:7.5, pung:2, chow:0.5, pair:0 }   // nhắm RTP ~97% cho người chơi tối ưu với hòm 3 quân
+  pays: { ugon:150, drag3:30, kong:15, u:5, pung:1.5, chow:0.3, pair:0 }
 };
 const NAMES = { ugon:'Dragon Hand', drag3:'Three Dragons', kong:'Four of a Kind', u:'Full Hand', pung:'Three of a Kind', chow:'Straight' };
 const LONG = { ugon:'Dragon Hand (Three Dragons + Pair)', drag3:'Three Dragons', kong:'Four of a Kind (Kong)', u:'Full Hand (Three-Tile Set + Pair)', pung:'Three of a Kind (Pung)', chow:'Straight (Chow)', pair:'Single Pair', none:'No set' };
@@ -740,7 +721,7 @@ const LAYOUT_P = {
   tray:[20,540,680,165],            /* khay 1x5 to bằng quân cờ */
   boardbox:[0,710,720,602], winline:[20,1316,680,52],   /* board 3 tầng so le (6x4 + 5x3 + 1), sát mép màn hình */
   paypanel:[195,597,330,366],       /* popup 1 cột, phóng 2x quanh tâm (360,780) -> 660x660, chỉ hiện khi bấm PAYOUTS */
-  payBtn:[34,1423,140,48], extraBtn:[534,100,166,92],   /* extraBtn: ngay dưới nút menu burger, canh phải theo mép menu */
+  payBtn:[34,1423,140,48],
   cta:[285,1372,150,150], pill:[572,1430,114,34],   /* BET ở giữa, PAYOUTS trái, chỉnh mức cược phải */
   bar:[0,1550,720,40]
 };
@@ -926,7 +907,8 @@ function buildDeck(){
    'grid'  (màn ngang): 8x5 phẳng, mọi quân đều bấm được.
    'stack' (màn dọc)  : 3 tầng xếp chồng (5x4 + 4x4 lệch nửa ô + hòm 2x2). Quân bị đè thì tối và chưa bấm được,
                         gỡ quân phía trên thì quân bên dưới sáng lên. Quân đều úp (bốc mù) nên xác suất/toán không đổi. */
-let G=null, boardMode=null, pendingMode=null, extraMode=false;   // extraMode: ván hiện tại đang chơi với Extra Bet (hòm mở sẵn)
+let G=null, boardMode=null, pendingMode=null;
+const extraMode=true;   // luôn mở sẵn hòm từ đầu ván (key là quân thừa, dùng ngay)
 const modeNow=()=>'stack';   // luôn dùng board xếp chồng; board 'grid' (màn ngang) đã ẩn
 function makeGeom(mode){
   const slots=[], add=(x,y,l,chest)=>slots.push({idx:slots.length,x,y,l,chest:!!chest,cov:[],tile:null});
@@ -935,8 +917,8 @@ function makeGeom(mode){
     UW=6; UH=4.24; const raise=.12;                                    // mỗi tầng nhô cao thêm 0.12 ô để thấy độ nổi
     for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j+2*raise,0);   // tầng dưới: 6x4 = 24 quân (các quân giữa nằm dưới hòm là quân thường, lộ ra khi gỡ quân hòm)
     for(let j=0;j<3;j++) for(let i=0;i<5;i++)                          // tầng trên: 5x3 = 15 quân, mỗi quân nằm giữa 4 quân tầng dưới (so le 2 chiều)
-      add(i+.5,j+.5+raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm khóa
-    // Board chỉ có 39 ô: quân thứ 40 ("quân thừa") luôn là quân bắt buộc bốc đầu tiên vào khay (xem layout/startRound)
+      add(i+.5,j+.5+raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm
+    // Board có 39 ô: Key là "quân thừa" tự dùng ngay đầu ván (xem layout/startRound)
     chestRect={x:1.5,y:1.62,w:3,h:1};
   } else {
     UW=CFG.cols; UH=CFG.rows;
@@ -1024,23 +1006,9 @@ function highlight(cat){ document.querySelectorAll('.prow').forEach(r=>{ r.class
 function updateHUD(){
   $('bal').textContent=fmt(balance); $('betv').textContent=fmt(bet()); $('betbar').textContent=fmt(bet());
   const lock=phase!=='idle'; $('betDown').disabled=lock||betIdx===0; $('betUp').disabled=lock||betIdx===CFG.bets.length-1;
-  updateExtra();
 }
 /* ---------- Extra Bet: công tắc bật/tắt (chỉ đổi được khi chưa vào ván). Bật = mỗi ván tốn extraBetCost x cược, hòm mở sẵn. Tắt = game như cũ. ---------- */
-let extraBet=true;   // mặc định BẬT khi mở game; người chơi tắt bằng công tắc
-const roundCost=()=> extraBet ? +(bet()*CFG.extraBetCost).toFixed(2) : bet();
-function updateExtra(){
-  const b=$('extraBtn'); if(!b) return;
-  b.style.display = CFG.extraBetCost>0 ? '' : 'none';   // extraBet.costMultiplier = 0 ⇒ ẩn tính năng
-  b.disabled = phase!=='idle';
-  b.classList.toggle('on',extraBet); b.setAttribute('aria-checked',extraBet);
-  $('extraState').textContent = extraBet ? 'ON' : 'OFF';
-  $('extraK').textContent = `EXTRA BET (${CFG.extraBetCost}X)`;
-}
-function toggleExtra(){
-  if(phase!=='idle') return;
-  extraBet=!extraBet; setIdle();
-}
+const roundCost=()=>bet();
 const playHost=(()=>{
 const RIGS={"idle":{"layers":[{"name":"leg_R","x":222,"y":990,"w":297,"h":516,"parent":"root","pivot":[390,1060],"src":"asset/character-rig/psd-parts/idle/19-leg_R.png"},{"name":"leg_L","x":497,"y":990,"w":292,"h":510,"parent":"root","pivot":[610,1060],"src":"asset/character-rig/psd-parts/idle/17-leg_L.png"},{"name":"head","x":307,"y":109,"w":419,"h":492,"parent":"torso","pivot":[540,560],"src":"asset/character-rig/psd-parts/idle/15-head.png"},{"name":"hair","x":285,"y":26,"w":451,"h":273,"parent":"head","pivot":[515,230],"src":"asset/character-rig/psd-parts/idle/13-hair.png"},{"name":"upper_arm_R","x":149,"y":566,"w":222,"h":246,"parent":"torso","pivot":[300,620],"src":"asset/character-rig/psd-parts/idle/12-upper_arm_R.png"},{"name":"upper_arm_L","x":705,"y":583,"w":123,"h":216,"parent":"torso","pivot":[715,620],"src":"asset/character-rig/psd-parts/idle/10-upper_arm_L.png"},{"name":"torso","x":250,"y":485,"w":527,"h":614,"parent":"root","pivot":[505,1060],"src":"asset/character-rig/psd-parts/idle/08-torso.png"},{"name":"forearm_R","x":133,"y":747,"w":200,"h":247,"parent":"upper_arm_R","pivot":[225,790],"src":"asset/character-rig/psd-parts/idle/06-forearm_R.png"},{"name":"forearm_L","x":741,"y":745,"w":155,"h":222,"parent":"upper_arm_L","pivot":[800,775],"src":"asset/character-rig/psd-parts/idle/04-forearm_L.png"},{"name":"hand_R","x":203,"y":881,"w":181,"h":154,"parent":"forearm_R","pivot":[260,935],"src":"asset/character-rig/psd-parts/idle/02-hand_R.png"},{"name":"hand_L","x":765,"y":895,"w":133,"h":177,"parent":"forearm_L","pivot":[815,925],"src":"asset/character-rig/psd-parts/idle/01-hand_L.png"}],"W":1024,"H":1536},"active":{"layers":[{"name":"leg_R","x":239,"y":923,"w":362,"h":439,"parent":"root","pivot":[460,950],"src":"asset/character-rig/psd-parts/active/18-leg_R.png"},{"name":"leg_L","x":562,"y":880,"w":393,"h":356,"parent":"root","pivot":[650,950],"src":"asset/character-rig/psd-parts/active/16-leg_L.png"},{"name":"head","x":357,"y":101,"w":412,"h":510,"parent":"torso","pivot":[580,560],"src":"asset/character-rig/psd-parts/active/14-head.png"},{"name":"hair","x":309,"y":0,"w":432,"h":303,"parent":"head","pivot":[540,250],"src":"asset/character-rig/psd-parts/active/12-hair.png"},{"name":"upper_arm_R","x":273,"y":439,"w":227,"h":262,"parent":"torso","pivot":[460,600],"src":"asset/character-rig/psd-parts/active/11-upper_arm_R.png"},{"name":"upper_arm_L","x":716,"y":415,"w":162,"h":269,"parent":"torso","pivot":[750,590],"src":"asset/character-rig/psd-parts/active/09-upper_arm_L.png"},{"name":"torso","x":309,"y":472,"w":544,"h":493,"parent":"root","pivot":[580,960],"src":"asset/character-rig/psd-parts/active/07-torso.png"},{"name":"forearm_R","x":148,"y":333,"w":237,"h":240,"parent":"upper_arm_R","pivot":[330,500],"src":"asset/character-rig/psd-parts/active/06-forearm_R.png"},{"name":"forearm_L","x":773,"y":318,"w":193,"h":211,"parent":"upper_arm_L","pivot":[835,480],"src":"asset/character-rig/psd-parts/active/04-forearm_L.png"},{"name":"hand_R","x":40,"y":174,"w":228,"h":247,"parent":"forearm_R","pivot":[210,390],"src":"asset/character-rig/psd-parts/active/02-hand_R.png"},{"name":"hand_L","x":860,"y":158,"w":232,"h":229,"parent":"forearm_L","pivot":[905,360],"src":"asset/character-rig/psd-parts/active/01-hand_L.png"}],"W":1143,"H":1376},"sulk":{"layers":[{"name":"leg_R","x":211,"y":1057,"w":292,"h":451,"parent":"root","pivot":[380,1080],"src":"asset/character-rig/psd-parts/sulk/19-leg_R.png"},{"name":"leg_L","x":478,"y":1060,"w":292,"h":446,"parent":"root","pivot":[620,1080],"src":"asset/character-rig/psd-parts/sulk/17-leg_L.png"},{"name":"head","x":303,"y":126,"w":432,"h":525,"parent":"torso","pivot":[530,590],"src":"asset/character-rig/psd-parts/sulk/15-head.png"},{"name":"hair","x":241,"y":17,"w":463,"h":323,"parent":"head","pivot":[480,250],"src":"asset/character-rig/psd-parts/sulk/13-hair.png"},{"name":"torso","x":222,"y":503,"w":572,"h":595,"parent":"root","pivot":[500,1080],"src":"asset/character-rig/psd-parts/sulk/12-torso.png"},{"name":"upper_arm_R","x":254,"y":558,"w":165,"h":269,"parent":"torso","pivot":[300,600],"src":"asset/character-rig/psd-parts/sulk/10-upper_arm_R.png"},{"name":"upper_arm_L","x":673,"y":544,"w":130,"h":277,"parent":"torso","pivot":[740,600],"src":"asset/character-rig/psd-parts/sulk/08-upper_arm_L.png"},{"name":"forearm_L","x":597,"y":747,"w":191,"h":143,"parent":"upper_arm_L","pivot":[780,830],"src":"asset/character-rig/psd-parts/sulk/06-forearm_L.png"},{"name":"forearm_R","x":265,"y":703,"w":344,"h":174,"parent":"upper_arm_R","pivot":[280,820],"src":"asset/character-rig/psd-parts/sulk/04-forearm_R.png"},{"name":"hand_L","x":349,"y":659,"w":147,"h":90,"parent":"forearm_L","pivot":[490,710],"src":"asset/character-rig/psd-parts/sulk/02-hand_L.png"},{"name":"hand_R","x":584,"y":700,"w":103,"h":97,"parent":"forearm_R","pivot":[600,750],"src":"asset/character-rig/psd-parts/sulk/01-hand_R.png"}],"W":1024,"H":1536}};
 const OX=138, OY=80;
@@ -1251,8 +1219,8 @@ function burstToWin(){
   }
 }
 function setIdle(){
-  phase='idle'; extraMode=false; if(pendingMode&&pendingMode!==boardMode) buildBoard(pendingMode); setPickable(false); updateHUD(); renderPaytable();
-  if(balance<roundCost()){ setCTA('BET',fmt(roundCost()),false); setResult('','Insufficient balance. Lower your bet'+(extraBet?' or turn off Extra Bet.':'.')); }
+  phase='idle'; if(pendingMode&&pendingMode!==boardMode) buildBoard(pendingMode); setPickable(false); updateHUD(); renderPaytable();
+  if(balance<roundCost()){ setCTA('BET',fmt(roundCost()),false); setResult('','Insufficient balance. Lower your bet.'); }
   else setCTA('BET',fmt(roundCost()),true,true);
 }
 
@@ -1270,7 +1238,6 @@ function resetTiles(){
 async function startRound(){
   const cost = roundCost();
   if(phase!=='idle'||balance<cost) return;
-  extraMode=extraBet;
   playHost('pick'); sfx('bet'); sfx('start');
   stopAutoPick();
   phase='dealing'; balance=+(balance-cost).toFixed(2); updateHUD(); setCTA('DEALING','',false);
@@ -1546,7 +1513,6 @@ $('cta').addEventListener('click',()=>{
   if(phase==='idle') startRound();
   else if(phase==='pick'){ if(canCashOut&&totalWin>0){ stopAutoPick(); cashOut(); } else toggleAutoPick(); }
 });
-$('extraBtn').addEventListener('click',toggleExtra);
 /* Payout popup (màn dọc) */
 function setPayOpen(o){ $('paypanel').classList.toggle('open',o); $('payBackdrop').classList.toggle('open',o); $('payBtn').setAttribute('aria-expanded',o); }
 $('payBtn').addEventListener('click',()=>setPayOpen(!$('paypanel').classList.contains('open')));
@@ -1596,10 +1562,6 @@ async function loadConfig(){
     const r = await fetch('config.json', {cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const cfg = await r.json(), p = cfg.payouts || {};
-    if(cfg.extraBet && 'costMultiplier' in cfg.extraBet){
-      const m = Number(cfg.extraBet.costMultiplier);
-      if(Number.isFinite(m) && m>=0) CFG.extraBetCost=m; else console.warn(`config.json: extraBet.costMultiplier không hợp lệ, giữ ${CFG.extraBetCost}`);
-    }
     for(const [name,k] of Object.entries(CONFIG_KEYS)){
       if(!(name in p)) continue;
       const v = Number(p[name]);
@@ -1607,7 +1569,6 @@ async function loadConfig(){
     }
   }catch(e){ console.warn('Không đọc được config.json, dùng payout mặc định:', e.message); }
   const s=document.getElementById('straightPay'); if(s) s.textContent=CFG.pays.chow;
-  const bc=document.getElementById('extraCostTxt'); if(bc) bc.textContent=CFG.extraBetCost;
 }
 Promise.all([loadAssets(), loadConfig()]).then(init);
 </script>
