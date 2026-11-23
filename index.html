@@ -738,16 +738,17 @@ html,body,#rotate {background:#291041}
 #stage.portrait .tile .front,#stage.portrait .tile .front.sp{background-size:100% 100% !important}
 /* character sits underneath the 1x5 tray (tray is later in the DOM, so equal z-index puts it on top of the host) */
 #stage.portrait .tray{z-index:1}
-/* drifting sakura petals: above the background art, behind the character and all UI */
-#petalFall{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
-#petalFall i{position:absolute;top:-6%;display:block;background:radial-gradient(ellipse at 30% 25%,#fff9e8,#ffbfd4 55%,#f27aa4);border-radius:80% 0 80% 30%;box-shadow:0 0 6px #ffd6e688;will-change:top,transform;
+/* drifting sakura petals: above the background art, behind the character and all UI. Transform-only animation (compositor), no filters/shadows. */
+#petalFall{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;container-type:size;contain:strict}
+#petalFall i{position:absolute;left:0;top:0;display:block;background:radial-gradient(ellipse at 30% 25%,#fff9e8,#ffbfd4 55%,#f27aa4);border-radius:80% 0 80% 30%;will-change:transform;
   animation:petalFall var(--dur,16s) linear var(--delay,0s) infinite}
 @keyframes petalFall{
-  0%{top:-6%;transform:translateX(0) rotate(0deg)}
-  25%{transform:translateX(var(--sx)) rotate(calc(var(--rot)*.3))}
-  50%{transform:translateX(0) rotate(calc(var(--rot)*.6))}
-  75%{transform:translateX(calc(var(--sx)*-1)) rotate(calc(var(--rot)*.85))}
-  100%{top:106%;transform:translateX(0) rotate(var(--rot))}}
+  0%{transform:translate3d(var(--x),-8cqh,0) rotate(0deg)}
+  25%{transform:translate3d(calc(var(--x) + var(--sx)),19cqh,0) rotate(calc(var(--rot)*.3))}
+  50%{transform:translate3d(var(--x),46cqh,0) rotate(calc(var(--rot)*.6))}
+  75%{transform:translate3d(calc(var(--x) - var(--sx)),77cqh,0) rotate(calc(var(--rot)*.85))}
+  100%{transform:translate3d(var(--x),108cqh,0) rotate(var(--rot))}}
+@supports not (height:1cqh){#petalFall{display:none}}
 @media (prefers-reduced-motion:reduce){#petalFall{display:none}}
 /* ---------- loading screen: bar follows real asset loading; START appears when everything is ready ---------- */
 #loading{position:absolute;inset:0;z-index:9999;overflow:hidden;background:#1d0b34;transition:opacity .6s ease}
@@ -765,6 +766,15 @@ html,body,#rotate {background:#291041}
 #loading .ld-start:active{transform:translate(-50%,-50%) scale(.96)}
 @keyframes ldPulse{0%,100%{box-shadow:0 0 0 3px #b9741f,0 8px 18px #2a0a1ccc,inset 0 3px 5px #fff9,0 0 0 0 #ffd36a00}50%{box-shadow:0 0 0 3px #b9741f,0 8px 18px #2a0a1ccc,inset 0 3px 5px #fff9,0 0 22px 8px #ffd36acc}}
 @media (prefers-reduced-motion:reduce){#loading.ready .ld-start{animation:none}#loading{transition-duration:.01ms}}
+/* ---------- perf: no per-frame blur filters on tiles / board (drop-shadow re-rasterises on every animation frame) ---------- */
+#stage .board.stack .tile{filter:none;border-radius:9px;box-shadow:0 4px 5px rgba(0,0,0,.42)}
+#stage .board.stack .tile.covered{filter:none}
+#stage .board.stack .tile.covered::after{content:"";position:absolute;inset:0;border-radius:9px;background:rgba(24,6,30,.5);pointer-events:none}
+#stage .tile .front,#stage .tile .front.sp,#stage .tile .back{filter:none}
+#stage .tile.lit .front,#stage .tile.lit .front.sp{filter:drop-shadow(0 0 5px #52fff0) drop-shadow(0 0 3px #52fff0)}
+#stage .tile.win .front,#stage .tile.win .front.sp{filter:drop-shadow(0 0 5px #ffe06c) drop-shadow(0 0 4px #ff6f9e)}
+#stage .boardbox,#stage.portrait #boardbox{filter:none}
+#stage .host canvas{filter:none}
 </style>
 </head>
 <body>
@@ -1204,7 +1214,7 @@ const PLACE = {
   active: {k:1, tx:650-523, ty:OY-31, ground:[523,1536]},
   sulk:   {k:1, tx:650-520, ty:OY-31, ground:[520,1536]},
 };
-const canvas=$('hostCanvas'); canvas.width=1300; canvas.height=1640;
+const canvas=$('hostCanvas'); const RS=.75; canvas.width=Math.round(1300*RS); canvas.height=Math.round(1640*RS);   // render at 75% resolution (CSS scales it up) - ~44% fewer pixels
 const ctx=canvas.getContext('2d'); if(!ctx)return ()=>{};
 const NAMES=RIGS.idle.layers.map(l=>l.name), SK={}, W={};
 for(const skin of ['idle','active','sulk']){
@@ -1315,7 +1325,7 @@ function poseNow(){return mode==='idle'?idlePose(idleT):TRACK[emo][mode](tm);}
 let lastPose=null,prevPose=null,fade=0;
 function drawRig(pose,alpha){
  const skin=pose.skin,s=SK[skin],P=PLACE[skin],ro=pose.root||{},[gx,gy]=P.ground;
- const base=new DOMMatrix().translate(P.tx,P.ty).scale(P.k).translate(gx+(ro.x||0),gy+(ro.y||0)).scale(ro.sx??1,ro.sy??1).translate(-gx,-gy);
+ const base=new DOMMatrix().scale(RS).translate(P.tx,P.ty).scale(P.k).translate(gx+(ro.x||0),gy+(ro.y||0)).scale(ro.sx??1,ro.sy??1).translate(-gx,-gy);
  // Resolve joint transforms from the hierarchy, then composite in the PSD's authored layer order.
  for(const n of s.order){const l=s.L[n],o=pose[n]||{},[px,py]=l.pivot;let m=l.parent==='root'?base:W[l.parent];
   if(n==='skirt'){ // top follows the torso, hem stays planted on the ground; own sway rotates about the waist
@@ -1333,17 +1343,22 @@ function render(pose){
  if(skin!==lastSkin){lastSkin=skin;prevPose=lastPose;fade=1;}
  lastPose=pose;
  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
- ctx.save();ctx.globalAlpha=.32;ctx.fillStyle='#271508';ctx.beginPath();const shx=OX+512-260,shy=OY+1505-32;ctx.ellipse(shx+260,shy+18,115+(-(ro.y||0))*.12,17,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.setTransform(RS,0,0,RS,0,0);ctx.save();ctx.globalAlpha=.32;ctx.fillStyle='#271508';ctx.beginPath();const shx=OX+512-260,shy=OY+1505-32;ctx.ellipse(shx+260,shy+18,115+(-(ro.y||0))*.12,17,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(fade>0&&prevPose)drawRig(prevPose,fade);   // old pose fades out under the new one (~0.1s) so the skin swap doesn't pop
  drawRig(pose,1);
- ctx.setTransform(1,0,0,1,0,0);
+ ctx.setTransform(RS,0,0,RS,0,0);
  for(const p of particles){if(p.life<0)continue;const k=Math.max(0,p.life/p.max);ctx.save();ctx.globalAlpha=p.puff?(1-k)*.75:1-Math.pow(k,3);ctx.translate(p.x,p.y);if(p.puff){ctx.fillStyle='rgba(238,240,236,.8)';ctx.beginPath();ctx.arc(0,0,p.size*(.45+k*.7),0,Math.PI*2);ctx.fill();}else{ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.beginPath();for(let j=0;j<8;j++){const a=j*Math.PI/4,r=j%2?p.size*.38:p.size;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();}ctx.restore();}
 }
 function stepFx(dt){particles=particles.filter(p=>{p.life+=dt;if(p.life>p.max)return false;if(p.life<0)return true;if(p.puff){p.vx*=Math.pow(.3,dt);p.vy*=Math.pow(.35,dt);}else{p.vy+=500*dt;p.rot+=p.vr*dt;}p.x+=p.vx*dt;p.y+=p.vy*dt;return true;});
  if(mode==='loop'&&emo==='active'){fxClock+=dt;if(fxClock>.8){fxClock=0;burst(9);}}else fxClock=0;
  if(mode==='loop'&&emo==='sulk'){const f=(tm*F)%60;if(f>=36&&f<40&&!huffDone){huffDone=true;puff();}if(f<30)huffDone=false;}else huffDone=false;
 }
-function frame(now){let dt=Math.min(.05,(now-last)/1000)*TURBO;last=now;if(reduced.matches)dt=0;advance(dt);render(poseNow());stepFx(dt);requestAnimationFrame(frame);}
+const ldEl=document.getElementById('loading'); let lastDraw=0;
+function frame(now){let dt=Math.min(.05,(now-last)/1000)*TURBO;last=now;if(reduced.matches)dt=0;advance(dt);
+ const covered=ldEl&&ldEl.isConnected&&!ldEl.classList.contains('hide');            // loading screen hides the character: don't draw
+ const calm=mode==='idle'&&fade<=0&&!particles.length;                                // idle breathing is slow: 30fps is plenty
+ if(!covered&&(!calm||now-lastDraw>=30)){render(poseNow());lastDraw=now;}
+ stepFx(dt);requestAnimationFrame(frame);}
 Promise.all(Object.values(SK).flatMap(s=>Object.values(s.images).map(im=>new Promise(resolve=>{if(im.complete)return resolve();im.onload=resolve;im.onerror=resolve;})))).then(()=>requestAnimationFrame(frame)).catch(e=>console.error('Updated character rig failed to load',e));
 return function(event){if(event==='pick'){go('idle');return;}if(event==='crash'){celebrating=false;go('sulk');return;}celebrating=true;hold=event==='cashout'?2.15:1.7;go('active');};
 })();
@@ -1771,12 +1786,11 @@ async function loadConfig(){
 }
 Promise.all([loadAssets(), loadConfig()]).then(init).catch(e=>console.error(e)).finally(()=>{window.__gameReady=true;window.dispatchEvent(new Event('gameready'));});
 
-/* sakura petals (decor): random size / speed / sway, already mid-flight on load */
+/* sakura petals (decor): 10 petals, random size / speed / sway, already mid-flight on load */
 (function(){const box=document.getElementById('petalFall');if(!box)return;
-  for(let i=0;i<16;i++){const p=document.createElement('i'),r=Math.random,sz=14+r()*16;
-    p.style.cssText=`left:${r()*100}%;width:${sz}px;height:${sz*.8}px;opacity:${(.45+r()*.4).toFixed(2)};`+
-      `--dur:${(15+r()*13).toFixed(1)}s;--delay:${(-r()*28).toFixed(1)}s;--sx:${(18+r()*34).toFixed(0)}px;--rot:${((r()<.5?-1:1)*(180+r()*360)).toFixed(0)}deg;`+
-      (sz<17?'filter:blur(.6px);':'');
+  for(let i=0;i<10;i++){const p=document.createElement('i'),r=Math.random,sz=14+r()*16;
+    p.style.cssText=`--x:${(r()*100).toFixed(1)}cqw;width:${sz.toFixed(0)}px;height:${(sz*.8).toFixed(0)}px;opacity:${(.5+r()*.35).toFixed(2)};`+
+      `--dur:${(16+r()*14).toFixed(1)}s;--delay:${(-r()*30).toFixed(1)}s;--sx:${(18+r()*34).toFixed(0)}px;--rot:${((r()<.5?-1:1)*(180+r()*360)).toFixed(0)}deg;`;
     box.appendChild(p);}
 })();
 
@@ -1785,7 +1799,11 @@ Promise.all([loadAssets(), loadConfig()]).then(init).catch(e=>console.error(e)).
   const root=document.getElementById('loading'); if(!root) return;
   const fill=root.querySelector('.ld-fill'), txt=root.querySelector('.ld-text'), btn=root.querySelector('.ld-start');
   const IMGS=["asset/background.png", "asset/runtime-01-card-back.png", "asset/runtime-02-card-front.png", "asset/runtime-03-spring.png", "asset/runtime-04-summer.png", "asset/runtime-05-autumn.png", "asset/runtime-06-winter.png", "asset/runtime-07-plaque.png", "asset/runtime-08-panel.png", "asset/runtime-09-row.png", "asset/runtime-10-wood.png", "asset/runtime-11-branches.png", "asset/runtime-12-canopy.png", "asset/runtime-13-petal.png", "asset/runtime-14-door-left.png", "asset/runtime-15-door-right.png", "asset/runtime-16-reel-frame.png", "asset/runtime-17-generated-ceramic.png", "asset/runtime-18-tile_back.png", "asset/win-popup/flag-base.png", "asset/win-popup/scroll.png", "asset/win-popup/title-win.png", "asset/win-popup/title-big-win.png", "asset/win-popup/title-mega-win.png", "asset/character-kimono/active-fan.webp", "asset/character-kimono/active-hair_back_L.webp", "asset/character-kimono/active-hair_back_R.webp", "asset/character-kimono/active-hand_wave.webp", "asset/character-kimono/active-head.webp", "asset/character-kimono/active-skirt.webp", "asset/character-kimono/active-sleeve_L.webp", "asset/character-kimono/active-sleeve_R.webp", "asset/character-kimono/active-tassel.webp", "asset/character-kimono/active-torso.webp", "asset/character-kimono/idle-fan.webp", "asset/character-kimono/idle-hair_back_L.webp", "asset/character-kimono/idle-hair_back_R.webp", "asset/character-kimono/idle-head.webp", "asset/character-kimono/idle-skirt.webp", "asset/character-kimono/idle-sleeve_L.webp", "asset/character-kimono/idle-sleeve_R.webp", "asset/character-kimono/idle-tassel.webp", "asset/character-kimono/idle-torso.webp", "asset/character-kimono/sulk-fan.webp", "asset/character-kimono/sulk-hair_back_L.webp", "asset/character-kimono/sulk-hair_back_R.webp", "asset/character-kimono/sulk-hair_front.webp", "asset/character-kimono/sulk-head.webp", "asset/character-kimono/sulk-skirt.webp", "asset/character-kimono/sulk-sleeve_L.webp", "asset/character-kimono/sulk-sleeve_R.webp", "asset/character-kimono/sulk-tassel.webp", "asset/character-kimono/sulk-torso.webp"];
-  const jobs=IMGS.map(src=>new Promise(res=>{const im=new Image();im.onload=im.onerror=()=>res();im.src=src;}));
+  const missing=(window.__missingAssets=[]);
+  const jobs=IMGS.map(src=>new Promise(res=>{const im=new Image();
+    im.onload=()=>{ (im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>res()); };   // wait until the image is decoded, not just downloaded
+    im.onerror=()=>{ missing.push(src); res(); };
+    im.src=src;}));
   Object.values(AUDIO).forEach(a=>jobs.push(new Promise(res=>{ if(a.readyState>=3) return res();
     a.addEventListener('canplaythrough',()=>res(),{once:true}); a.addEventListener('error',()=>res(),{once:true}); setTimeout(res,3000); })));   // iOS won't preload audio before a tap -> don't wait forever
   jobs.push(new Promise(res=>{ if(window.__gameReady) return res(); addEventListener('gameready',()=>res(),{once:true}); }));   // game's own init (assets + config + board build)
@@ -1796,11 +1814,24 @@ Promise.all([loadAssets(), loadConfig()]).then(init).catch(e=>console.error(e)).
     const target=Math.min(done/jobs.length,(now-t0)/MIN_MS,1);      // never faster than MIN_MS, never ahead of real loading
     shown+=(target-shown)*.14; if(target-shown<.003) shown=target;
     fill.style.width=(shown*100).toFixed(1)+'%'; txt.textContent='LOADING… '+Math.round(shown*100)+'%';
-    if(shown>=1){ root.classList.add('ready'); btn.disabled=false; try{btn.focus({preventScroll:true});}catch(e){} return; }
+    if(shown>=1){ if(missing.length){ console.warn('Missing assets:',missing); txt.textContent=''; } root.classList.add('ready'); btn.disabled=false; try{btn.focus({preventScroll:true});}catch(e){} return; }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
   btn.addEventListener('click',()=>{ startBgm(); root.classList.add('hide'); setTimeout(()=>root.remove(),700); });
+})();
+
+/* ---------- on-device debug: open the game with ?debug=1 to see errors / missing assets / game phase on screen ---------- */
+(function(){
+  if(!/[?&]debug\b/.test(location.search)) return;
+  const box=document.createElement('pre');
+  box.style.cssText='position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;margin:0;padding:6px 8px;z-index:100000;font:11px/1.35 monospace;color:#fff;background:#000c;white-space:pre-wrap;pointer-events:none';
+  document.body.appendChild(box);
+  const logs=[]; const push=m=>{logs.push(m); if(logs.length>12)logs.shift();};
+  addEventListener('error',e=>push('ERR '+e.message+' @'+(e.filename||'').split('/').pop()+':'+e.lineno));
+  addEventListener('unhandledrejection',e=>push('REJ '+(e.reason&&e.reason.message||e.reason)));
+  setInterval(()=>{ let st=''; try{ st='phase='+phase+' tiles='+tiles.length+' ready='+!!window.__gameReady+' missing='+(window.__missingAssets||[]).length; }catch(e){ st='state n/a: '+e.message; }
+    box.textContent=st+'\n'+((window.__missingAssets||[]).slice(0,6).join('\n'))+(logs.length?'\n'+logs.join('\n'):''); },400);
 })();
 </script>
 </body>
