@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bamboo Tray</title>
+<title>Sakura Mahjong</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
@@ -587,6 +587,167 @@ button{font:inherit;color:inherit}
 }
 .paypanel {z-index:2}
 .host canvas {position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:100%;width:auto;filter:drop-shadow(0 2px 2px #3b160d8a)}
+/* portrait: bust-up character (cropped at the waist by the multiplier cards), scale ~1.02 stage px per art px */
+#stage.portrait .host{overflow:hidden}
+#stage.portrait .host canvas{top:-70px;bottom:auto;height:1672px}
+
+/* Sakura festival reskin: vivid Japanese arcade palette, using the supplied ceramic,
+   wood, blossom and season artwork while leaving the game layout and controls intact. */
+:root {
+  --g1:#ff7a9f;--g2:#d84478;--g3:#5a2054;
+  --gold:#ffe36e;--gold2:#bc7224;--gold3:#fff3b0;
+  --peach1:#fff4e4;--peach2:#f4d7c6;--peachEdge:#bd7860;
+  --ivory1:#fffdf4;--ivory2:#e9e4d8;--ivoryEdge:#a99b83;
+  --jade1:#69ead6;--jade2:#078c91;
+  --text:#fff8ec;--bar:#2b1242;
+}
+html,body,#rotate {background:#291041}
+#stage {
+  --back-base:#c83472;--back-light:#ffbfd1;--back-accent:#ffcf5f;--back-edge:#45143d;
+  background-color:var(--back-base);
+  background-image:
+    radial-gradient(ellipse at 50% 42%,transparent 34%,#3c0b4799 100%),
+    radial-gradient(ellipse at 12% 20%,#ffbfda 0 5%,transparent 33%),
+    radial-gradient(ellipse at 90% 27%,#ffcf5f99,transparent 31%),
+    radial-gradient(ellipse at 68% 90%,#24c9c3a8,transparent 39%),
+    repeating-radial-gradient(ellipse at 50% 100%,#ffffff12 0 2px,transparent 2px 14px),
+    linear-gradient(135deg,#fa668d 0%,#d53872 43%,#7e286f 74%,#213d72 100%);
+  background-size:auto,auto,auto,auto,100% 60%,auto;
+  transition:background-color .5s ease;
+}
+#stage::before {
+  background:
+    radial-gradient(ellipse at 17% 21%,#fff4e2 0 4px,transparent 5px),
+    radial-gradient(ellipse at 20% 19%,#ffcfdf 0 15px,transparent 16px),
+    radial-gradient(ellipse at 83% 28%,#fff2d7 0 4px,transparent 5px),
+    radial-gradient(ellipse at 86% 26%,#ffb9d0 0 17px,transparent 18px),
+    radial-gradient(ellipse at 7% 82%,#ffcf5f99 0 10px,transparent 11px),
+    repeating-conic-gradient(from 0deg at 17% 20%,#fff6 0 8deg,transparent 9deg 72deg),
+    repeating-conic-gradient(from 0deg at 84% 27%,#fff6 0 8deg,transparent 9deg 72deg);
+  opacity:.7;mix-blend-mode:screen;
+}
+#stage::after {
+  background:
+    radial-gradient(ellipse at 21% 27%,var(--back-light),transparent 43%),
+    radial-gradient(ellipse at 80% 69%,var(--back-accent),transparent 45%),
+    radial-gradient(ellipse at 50% 47%,transparent 52%,var(--back-edge));
+  opacity:.48;
+}
+#stage[data-season="spring"] {--back-base:#c83472;--back-light:#ffbfd1;--back-accent:#ffcf5f;--back-edge:#45143d}
+#stage[data-season="summer"] {--back-base:#1b9d9e;--back-light:#9bfff0;--back-accent:#ffdf61;--back-edge:#103d69}
+#stage[data-season="autumn"] {--back-base:#f06a3e;--back-light:#ffe09a;--back-accent:#fd9e35;--back-edge:#70234c}
+#stage[data-season="winter"] {--back-base:#496bcc;--back-light:#d7edff;--back-accent:#ff9fc9;--back-edge:#27235f}
+.blob {background:radial-gradient(circle at 30% 25%,#fff3b8,#ff9eaf 45%,#24bdb8);box-shadow:0 6px 14px #36143f80;filter:blur(3px);opacity:.64}
+.petal {background:radial-gradient(ellipse at 30% 25%,#fff9e8,#ffbad0 55%,#ea6395);box-shadow:0 3px 7px #41163f70}
+.boardbox,#stage.portrait #boardbox {
+  background:linear-gradient(135deg,#6d244d,#3b1c43) var(--ref-wood) center/cover no-repeat;
+  border:3px solid #ffc95c;border-radius:20px;
+  box-shadow:inset 0 0 0 2px #fff0a2,0 8px 18px #250d407a;
+  filter:drop-shadow(0 5px 5px #32123e8c);
+}
+.board,#stage.portrait .board {inset:7px 8px;overflow:hidden}
+.reel-gates,#stage.portrait .reel-gates {inset:7px 8px;overflow:hidden}
+.reel-gate {background-color:#63294f}
+.tray,#stage.portrait .tray {
+  background:linear-gradient(180deg,#a84470,#5c2858);
+  border:2px solid #ffd36d;border-radius:18px;
+  box-shadow:inset 0 0 0 2px #ffeda7,0 7px 16px #250d407a;
+}
+.tslot,#stage.portrait .tslot {background:#28123d80;box-shadow:inset 0 2px 7px #160923}
+.paypanel,#stage.portrait .paypanel {
+  color:#fff6e8;background:linear-gradient(160deg,#59224e,#271745 78%);
+  border:2px solid #ffd16b;border-radius:22px;
+  box-shadow:inset 0 0 0 3px #ffedaa,0 8px 20px #16082988;
+}
+.paypanel::before,.paypanel::after {display:none}
+.paytitle,.bonus .t {color:#ffe27a;font-family:var(--ui);font-weight:800;letter-spacing:1.2px;text-shadow:0 2px #37133f}
+.paypanel .prow {
+  background:linear-gradient(110deg,#fff8e7,#ffe3a1 47%,#ffbb70);
+  color:#542042;border:1px solid #fff1bb;border-radius:10px;
+  box-shadow:inset 0 -3px 0 #cb792f,0 2px 4px #16092366;
+}
+.prow.hit {box-shadow:inset 0 -3px 0 #cb792f,0 0 0 3px #52fff0,0 0 18px #52fff0}
+.prow.dim {filter:grayscale(.4) brightness(.73)}
+.boardbox .ghost {background:#28123d53;box-shadow:inset 0 2px 7px #160923}
+.front,.front.sp,.tile.lit .front,.tile.lit .front.sp,.tile.win .front,.tile.win .front.sp {
+  filter:drop-shadow(0 3px 2px #32143c80);
+}
+.back,.tile:nth-child(even) .back,.back.skin {
+  background:
+    radial-gradient(circle at 50% 50%,#ffd56c 0 4%,transparent 5% 18%,#ffd56c 19% 21%,transparent 22% 38%,#ffd56c 39% 41%,transparent 42%),
+    repeating-linear-gradient(45deg,#fff2 0 3px,transparent 3px 9px),
+    linear-gradient(145deg,#ff91b7,#c82c72 56%,#572660) !important;
+  background-size:100% 100%,12px 12px,100% 100% !important;
+  border:2px solid #ffe184!important;border-radius:8px;
+  box-shadow:inset 0 0 0 2px #fff4ce,0 3px 6px #21102c99!important;
+}
+.tile.lit .front,.tile.lit .front.sp {filter:drop-shadow(0 0 5px #52fff0) drop-shadow(0 0 3px #52fff0)}
+.tile.win .front,.tile.win .front.sp {filter:drop-shadow(0 0 5px #ffe06c) drop-shadow(0 0 4px #ff6f9e)}
+.chest {
+  border:2px solid #ffd26a;background:repeating-linear-gradient(90deg,#fff2 0 2px,transparent 2px 13px),linear-gradient(#ea5780,#712b64);
+  box-shadow:inset 0 0 0 3px #562050,inset 0 0 0 6px #ffd26a,0 4px 12px #28123d;
+}
+.chest::before,.chest::after {opacity:.48;background:repeating-linear-gradient(45deg,transparent 0 9px,#7bfff0 9px 11px,transparent 11px 20px)}
+.chest::after {background:repeating-linear-gradient(-45deg,transparent 0 9px,#7bfff0 9px 11px,transparent 11px 20px)}
+.medal {
+  background:conic-gradient(from 200deg,#fff5a9,#fb9d39,#fff0a1,#e55873,#ffe58a,#23c3c3,#fff5a9);
+  box-shadow:0 8px 20px #260c407a,inset 0 0 0 2px #692449;
+}
+.medal .ring {background:radial-gradient(circle at 50% 38%,#d8fff6,#42d8d2 48%,#087c9b 73%);box-shadow:inset 0 0 0 3px #fff6d8,inset 0 -8px 16px #16406d80}
+.medal .core {background:radial-gradient(circle at 50% 30%,#ff6688,#c32663 62%,#652057);box-shadow:inset 0 0 0 3px #ffe070,inset 0 6px 14px #fff5}
+.medal .k {color:#fff5dc;text-shadow:0 2px #5e154d}
+.medal .s {color:#fff;text-shadow:0 2px #611a4f}
+.pill,.autobtn,.menu-auto {background:#311744d9;box-shadow:inset 0 0 0 1.5px #f5c955;color:#fff4db}
+.pill button {background:linear-gradient(#fff18a,#f6a63f);color:#5b2149}
+.round {background:linear-gradient(145deg,#24c4c1,#2074ad);box-shadow:0 0 0 3px #fff2cb,0 0 0 5px #82305e,0 5px 12px #210b3d99}
+#turboBtn.on {background:radial-gradient(circle at 50% 35%,#fff184,#ff9b42);box-shadow:0 0 0 3px #fff2bd,0 0 18px #ffb73d}
+.bar {background:linear-gradient(90deg,#25133e,#51204f 50%,#25133e);color:#fff3e6;box-shadow:0 -2px 0 #ffd46a}
+.bar b {color:#ffe06c}
+.win-line {color:#fff5dd;text-shadow:0 3px 1px #4b1647,0 0 12px #ff9e48}
+.win-line .v {background:linear-gradient(#fff6a8,#ffcc43 48%,#ff8c45);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 0 #6e2742)}
+.result {color:#fff9ea;text-shadow:0 2px 4px #381344}
+.result.cashout-hint .msg {color:#fff6d9}
+.menu {background:linear-gradient(160deg,#59224e,#25153f);box-shadow:0 0 0 2px #ffd16b,0 14px 30px #18082999;color:#fff4e7}
+.menu h2 {color:#ffe27a}
+.win-popup {background:rgba(35,11,51,.64)}
+.win-pop-amount {color:#a51f56}
+#stage.portrait #payBtn {color:#5c214d;background:linear-gradient(180deg,#fff0a8,#ffca52 45%,#f09042 55%,#ffe084);box-shadow:0 0 0 3px #7c2c5e,0 0 0 5px #fff0ad,0 6px 12px #210b3d99,inset 0 -3px 0 #a35432}
+#stage.portrait .result {color:#542045;background:linear-gradient(180deg,#fffdf0,#ffdfaa);box-shadow:0 0 0 3px #ffd15e,0 8px 16px #2b104566}
+#stage.portrait .result::before {border-left-color:#ffd15e}
+#stage.portrait .result::after {border-left-color:#fff0cb}
+#stage.portrait .result .set,#stage.portrait .result.lose .set,#stage.portrait .result.cashout-hint .msg {color:#a22b60}
+#stage.portrait .pay-close {background:#dc3e70;box-shadow:0 0 0 3px #ffe091,0 3px 8px #3d164f}
+/* Match the approved Japanese night-festival scene instead of the plain color wash. */
+#stage {
+  background-color:#311a5a;
+  background-image:url('asset/background.png');
+  background-size:100% 100%;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+#stage::before {
+  content:none;
+}
+#stage::after {
+  content:none;
+}
+.blob,.petal {display:none}
+@media (prefers-reduced-motion:reduce) {#stage {transition:none}}
+/* tiles: stretch the ceramic face to fill the whole cell (it was letterboxed by 'contain', leaving ~14% empty width) */
+#stage.portrait .tile .front,#stage.portrait .tile .front.sp{background-size:100% 100% !important}
+/* character sits underneath the 1x5 tray (tray is later in the DOM, so equal z-index puts it on top of the host) */
+#stage.portrait .tray{z-index:1}
+/* drifting sakura petals: above the background art, behind the character and all UI */
+#petalFall{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#petalFall i{position:absolute;top:-6%;display:block;background:radial-gradient(ellipse at 30% 25%,#fff9e8,#ffbfd4 55%,#f27aa4);border-radius:80% 0 80% 30%;box-shadow:0 0 6px #ffd6e688;will-change:top,transform;
+  animation:petalFall var(--dur,16s) linear var(--delay,0s) infinite}
+@keyframes petalFall{
+  0%{top:-6%;transform:translateX(0) rotate(0deg)}
+  25%{transform:translateX(var(--sx)) rotate(calc(var(--rot)*.3))}
+  50%{transform:translateX(0) rotate(calc(var(--rot)*.6))}
+  75%{transform:translateX(calc(var(--sx)*-1)) rotate(calc(var(--rot)*.85))}
+  100%{top:106%;transform:translateX(0) rotate(var(--rot))}}
+@media (prefers-reduced-motion:reduce){#petalFall{display:none}}
 </style>
 </head>
 <body>
@@ -600,6 +761,7 @@ button{font:inherit;color:inherit}
   <div class="petal" style="left:960px;top:70px;transform:rotate(10deg)"></div>
   <div class="petal" style="left:1240px;top:350px;transform:rotate(-60deg)"></div>
 
+  <div id="petalFall" aria-hidden="true"></div>
   <div class="host" id="host" aria-hidden="true"><canvas id="hostCanvas" width="960" height="680"></canvas></div>
 
   <div id="payBackdrop" aria-hidden="true"></div>
@@ -716,7 +878,7 @@ const LAYOUT_L = {
    Thứ tự: nhân vật -> 4 lá bài (che chân) -> khay -> board -> current win -> payout + bet */
 const LAYOUT_P = {
   homeBtn:[16,22,70,70], menuBtn:[634,24,66,66], turboBtn:[552,24,66,66],
-  host:[180,0,360,462], result:[18,96,232,100],     /* bong bóng thoại bên trái nhân vật */    /* nhân vật; lá bài che từ bụng trở xuống */
+  host:[0,0,720,543], result:[18,96,232,100],     /* bong bóng thoại bên trái nhân vật */    /* nhân vật; lá bài che từ bụng trở xuống */
   bonus:[220,312,280,170],          /* hiển thị phóng 1.3x (CSS #stage.portrait #bonus) */
   tray:[20,540,680,165],            /* khay 1x5 to bằng quân cờ */
   boardbox:[0,710,720,602], winline:[20,1316,680,52],   /* board 3 tầng so le (6x4 + 5x3 + 1), sát mép màn hình */
@@ -931,11 +1093,11 @@ function makeGeom(mode){
   slots.forEach(a=>slots.forEach(b=>{ if(b.l>a.l && ov(a,b)>.15) a.cov.push(b.idx); }));   // ô b nằm trên và đè lên ô a
   return {mode,UW,UH,slots,chest:slots.filter(s=>s.chest).map(s=>s.idx),chestRect};
 }
-const slotBox=(s)=>({left:`calc(${s.x*100/G.UW}% + 2px)`, top:`calc(${s.y*100/G.UH}% + 2px)`, width:`calc(${100/G.UW}% - 4px)`, height:`calc(${100/G.UH}% - 4px)`});
+const slotBox=(s)=>({left:`calc(${s.x*100/G.UW}% + 1px)`, top:`calc(${s.y*100/G.UH}% + 1px)`, width:`calc(${100/G.UW}% - 2px)`, height:`calc(${100/G.UH}% - 2px)`});
 function placeTile(t){ Object.assign(t.el.style, slotBox(t.slot), {zIndex:String(t.slot.l*10+1)}); }
 function placeChest(){
   const c=G.chestRect;
-  Object.assign(chestEl.style,{left:`calc(${c.x*100/G.UW}% + 2px)`, top:`calc(${c.y*100/G.UH}% + 2px)`, width:`calc(${c.w*100/G.UW}% - 4px)`, height:`calc(${c.h*100/G.UH}% - 4px)`});
+  Object.assign(chestEl.style,{left:`calc(${c.x*100/G.UW}% + 1px)`, top:`calc(${c.y*100/G.UH}% + 1px)`, width:`calc(${c.w*100/G.UW}% - 2px)`, height:`calc(${c.h*100/G.UH}% - 2px)`});
 }
 function buildBoard(mode){
   boardMode=mode; pendingMode=null; G=makeGeom(mode);
@@ -1010,13 +1172,13 @@ function updateHUD(){
 /* ---------- Extra Bet: công tắc bật/tắt (chỉ đổi được khi chưa vào ván). Bật = mỗi ván tốn extraBetCost x cược, hòm mở sẵn. Tắt = game như cũ. ---------- */
 const roundCost=()=>bet();
 const playHost=(()=>{
-const RIGS={"idle":{"layers":[{"name":"leg_R","x":222,"y":990,"w":297,"h":516,"parent":"root","pivot":[390,1060],"src":"asset/character-rig/psd-parts/idle/19-leg_R.png"},{"name":"leg_L","x":497,"y":990,"w":292,"h":510,"parent":"root","pivot":[610,1060],"src":"asset/character-rig/psd-parts/idle/17-leg_L.png"},{"name":"head","x":307,"y":109,"w":419,"h":492,"parent":"torso","pivot":[540,560],"src":"asset/character-rig/psd-parts/idle/15-head.png"},{"name":"hair","x":285,"y":26,"w":451,"h":273,"parent":"head","pivot":[515,230],"src":"asset/character-rig/psd-parts/idle/13-hair.png"},{"name":"upper_arm_R","x":149,"y":566,"w":222,"h":246,"parent":"torso","pivot":[300,620],"src":"asset/character-rig/psd-parts/idle/12-upper_arm_R.png"},{"name":"upper_arm_L","x":705,"y":583,"w":123,"h":216,"parent":"torso","pivot":[715,620],"src":"asset/character-rig/psd-parts/idle/10-upper_arm_L.png"},{"name":"torso","x":250,"y":485,"w":527,"h":614,"parent":"root","pivot":[505,1060],"src":"asset/character-rig/psd-parts/idle/08-torso.png"},{"name":"forearm_R","x":133,"y":747,"w":200,"h":247,"parent":"upper_arm_R","pivot":[225,790],"src":"asset/character-rig/psd-parts/idle/06-forearm_R.png"},{"name":"forearm_L","x":741,"y":745,"w":155,"h":222,"parent":"upper_arm_L","pivot":[800,775],"src":"asset/character-rig/psd-parts/idle/04-forearm_L.png"},{"name":"hand_R","x":203,"y":881,"w":181,"h":154,"parent":"forearm_R","pivot":[260,935],"src":"asset/character-rig/psd-parts/idle/02-hand_R.png"},{"name":"hand_L","x":765,"y":895,"w":133,"h":177,"parent":"forearm_L","pivot":[815,925],"src":"asset/character-rig/psd-parts/idle/01-hand_L.png"}],"W":1024,"H":1536},"active":{"layers":[{"name":"leg_R","x":239,"y":923,"w":362,"h":439,"parent":"root","pivot":[460,950],"src":"asset/character-rig/psd-parts/active/18-leg_R.png"},{"name":"leg_L","x":562,"y":880,"w":393,"h":356,"parent":"root","pivot":[650,950],"src":"asset/character-rig/psd-parts/active/16-leg_L.png"},{"name":"head","x":357,"y":101,"w":412,"h":510,"parent":"torso","pivot":[580,560],"src":"asset/character-rig/psd-parts/active/14-head.png"},{"name":"hair","x":309,"y":0,"w":432,"h":303,"parent":"head","pivot":[540,250],"src":"asset/character-rig/psd-parts/active/12-hair.png"},{"name":"upper_arm_R","x":273,"y":439,"w":227,"h":262,"parent":"torso","pivot":[460,600],"src":"asset/character-rig/psd-parts/active/11-upper_arm_R.png"},{"name":"upper_arm_L","x":716,"y":415,"w":162,"h":269,"parent":"torso","pivot":[750,590],"src":"asset/character-rig/psd-parts/active/09-upper_arm_L.png"},{"name":"torso","x":309,"y":472,"w":544,"h":493,"parent":"root","pivot":[580,960],"src":"asset/character-rig/psd-parts/active/07-torso.png"},{"name":"forearm_R","x":148,"y":333,"w":237,"h":240,"parent":"upper_arm_R","pivot":[330,500],"src":"asset/character-rig/psd-parts/active/06-forearm_R.png"},{"name":"forearm_L","x":773,"y":318,"w":193,"h":211,"parent":"upper_arm_L","pivot":[835,480],"src":"asset/character-rig/psd-parts/active/04-forearm_L.png"},{"name":"hand_R","x":40,"y":174,"w":228,"h":247,"parent":"forearm_R","pivot":[210,390],"src":"asset/character-rig/psd-parts/active/02-hand_R.png"},{"name":"hand_L","x":860,"y":158,"w":232,"h":229,"parent":"forearm_L","pivot":[905,360],"src":"asset/character-rig/psd-parts/active/01-hand_L.png"}],"W":1143,"H":1376},"sulk":{"layers":[{"name":"leg_R","x":211,"y":1057,"w":292,"h":451,"parent":"root","pivot":[380,1080],"src":"asset/character-rig/psd-parts/sulk/19-leg_R.png"},{"name":"leg_L","x":478,"y":1060,"w":292,"h":446,"parent":"root","pivot":[620,1080],"src":"asset/character-rig/psd-parts/sulk/17-leg_L.png"},{"name":"head","x":303,"y":126,"w":432,"h":525,"parent":"torso","pivot":[530,590],"src":"asset/character-rig/psd-parts/sulk/15-head.png"},{"name":"hair","x":241,"y":17,"w":463,"h":323,"parent":"head","pivot":[480,250],"src":"asset/character-rig/psd-parts/sulk/13-hair.png"},{"name":"torso","x":222,"y":503,"w":572,"h":595,"parent":"root","pivot":[500,1080],"src":"asset/character-rig/psd-parts/sulk/12-torso.png"},{"name":"upper_arm_R","x":254,"y":558,"w":165,"h":269,"parent":"torso","pivot":[300,600],"src":"asset/character-rig/psd-parts/sulk/10-upper_arm_R.png"},{"name":"upper_arm_L","x":673,"y":544,"w":130,"h":277,"parent":"torso","pivot":[740,600],"src":"asset/character-rig/psd-parts/sulk/08-upper_arm_L.png"},{"name":"forearm_L","x":597,"y":747,"w":191,"h":143,"parent":"upper_arm_L","pivot":[780,830],"src":"asset/character-rig/psd-parts/sulk/06-forearm_L.png"},{"name":"forearm_R","x":265,"y":703,"w":344,"h":174,"parent":"upper_arm_R","pivot":[280,820],"src":"asset/character-rig/psd-parts/sulk/04-forearm_R.png"},{"name":"hand_L","x":349,"y":659,"w":147,"h":90,"parent":"forearm_L","pivot":[490,710],"src":"asset/character-rig/psd-parts/sulk/02-hand_L.png"},{"name":"hand_R","x":584,"y":700,"w":103,"h":97,"parent":"forearm_R","pivot":[600,750],"src":"asset/character-rig/psd-parts/sulk/01-hand_R.png"}],"W":1024,"H":1536}};
+const RIGS={"idle":{"layers":[{"name":"hair_back_R","x":25,"y":259,"w":449,"h":574,"parent":"torso","pivot":[400,300],"src":"asset/character-kimono/idle-hair_back_R.webp"},{"name":"hair_back_L","x":610,"y":296,"w":319,"h":476,"parent":"torso","pivot":[640,300],"src":"asset/character-kimono/idle-hair_back_L.webp"},{"name":"skirt","x":129,"y":638,"w":736,"h":898,"parent":"root","pivot":[520,650],"src":"asset/character-kimono/idle-skirt.webp"},{"name":"sleeve_R","x":94,"y":324,"w":369,"h":993,"parent":"torso","pivot":[385,330],"src":"asset/character-kimono/idle-sleeve_R.webp"},{"name":"sleeve_L","x":626,"y":344,"w":304,"h":1008,"parent":"torso","pivot":[645,350],"src":"asset/character-kimono/idle-sleeve_L.webp"},{"name":"torso","x":432,"y":314,"w":230,"h":354,"parent":"root","pivot":[545,660],"src":"asset/character-kimono/idle-torso.webp"},{"name":"head","x":165,"y":0,"w":505,"h":481,"parent":"torso","pivot":[470,330],"src":"asset/character-kimono/idle-head.webp"},{"name":"fan","x":447,"y":448,"w":302,"h":274,"parent":"torso","pivot":[560,620],"src":"asset/character-kimono/idle-fan.webp"},{"name":"tassel","x":530,"y":695,"w":114,"h":176,"parent":"torso","pivot":[587,700],"src":"asset/character-kimono/idle-tassel.webp"}]},"active":{"layers":[{"name":"hair_back_R","x":0,"y":219,"w":458,"h":508,"parent":"torso","pivot":[420,300],"src":"asset/character-kimono/active-hair_back_R.webp"},{"name":"hair_back_L","x":665,"y":337,"w":348,"h":573,"parent":"torso","pivot":[690,330],"src":"asset/character-kimono/active-hair_back_L.webp"},{"name":"skirt","x":54,"y":575,"w":841,"h":961,"parent":"root","pivot":[540,600],"src":"asset/character-kimono/active-skirt.webp"},{"name":"sleeve_R","x":13,"y":110,"w":411,"h":985,"parent":"torso","pivot":[400,340],"src":"asset/character-kimono/active-sleeve_R.webp"},{"name":"sleeve_L","x":634,"y":339,"w":372,"h":901,"parent":"torso","pivot":[650,360],"src":"asset/character-kimono/active-sleeve_L.webp"},{"name":"torso","x":373,"y":261,"w":318,"h":378,"parent":"root","pivot":[535,630],"src":"asset/character-kimono/active-torso.webp"},{"name":"head","x":277,"y":0,"w":407,"h":382,"parent":"torso","pivot":[510,335],"src":"asset/character-kimono/active-head.webp"},{"name":"tassel","x":546,"y":639,"w":138,"h":188,"parent":"torso","pivot":[610,645],"src":"asset/character-kimono/active-tassel.webp"},{"name":"fan","x":635,"y":200,"w":264,"h":283,"parent":"sleeve_L","pivot":[775,400],"src":"asset/character-kimono/active-fan.webp"},{"name":"hand_wave","x":111,"y":0,"w":233,"h":208,"parent":"sleeve_R","pivot":[235,195],"src":"asset/character-kimono/active-hand_wave.webp"}]},"sulk":{"layers":[{"name":"hair_back_R","x":80,"y":272,"w":325,"h":609,"parent":"torso","pivot":[400,320],"src":"asset/character-kimono/sulk-hair_back_R.webp"},{"name":"hair_back_L","x":680,"y":343,"w":230,"h":428,"parent":"torso","pivot":[690,350],"src":"asset/character-kimono/sulk-hair_back_L.webp"},{"name":"skirt","x":108,"y":613,"w":759,"h":923,"parent":"root","pivot":[520,640],"src":"asset/character-kimono/sulk-skirt.webp"},{"name":"sleeve_R","x":108,"y":323,"w":400,"h":991,"parent":"torso","pivot":[390,350],"src":"asset/character-kimono/sulk-sleeve_R.webp"},{"name":"sleeve_L","x":640,"y":350,"w":287,"h":1010,"parent":"torso","pivot":[640,380],"src":"asset/character-kimono/sulk-sleeve_L.webp"},{"name":"torso","x":389,"y":279,"w":279,"h":418,"parent":"root","pivot":[535,690],"src":"asset/character-kimono/sulk-torso.webp"},{"name":"head","x":250,"y":0,"w":423,"h":349,"parent":"torso","pivot":[470,340],"src":"asset/character-kimono/sulk-head.webp"},{"name":"hair_front","x":455,"y":286,"w":231,"h":213,"parent":"head","pivot":[560,290],"src":"asset/character-kimono/sulk-hair_front.webp"},{"name":"fan","x":509,"y":376,"w":228,"h":252,"parent":"torso","pivot":[570,540],"src":"asset/character-kimono/sulk-fan.webp"},{"name":"tassel","x":550,"y":672,"w":110,"h":212,"parent":"torso","pivot":[605,675],"src":"asset/character-kimono/sulk-tassel.webp"}]}};
 const OX=138, OY=80;
 // placement of each skin in stage space (idle canvas units)
 const PLACE = {
-  idle:   {k:1,    tx:OX,        ty:OY,      ground:[512,1505]},
-  active: {k:1.07, tx:OX-117,    ty:OY+56,   ground:[580,1354]},
-  sulk:   {k:1.0,  tx:OX,        ty:OY-2,    ground:[495,1507]},
+  idle:   {k:1, tx:650-525, ty:OY-31, ground:[525,1536]},
+  active: {k:1, tx:650-523, ty:OY-31, ground:[523,1536]},
+  sulk:   {k:1, tx:650-520, ty:OY-31, ground:[520,1536]},
 };
 const canvas=$('hostCanvas'); canvas.width=1300; canvas.height=1640;
 const ctx=canvas.getContext('2d'); if(!ctx)return ()=>{};
@@ -1035,75 +1197,77 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const eo=t=>1-Math.pow(1-t,3), eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const F=30;
 function idlePose(t){
-  const ph=t/(40/F)*TAU, d=6*(0.5-0.5*C(ph));
+  const ph=t/(40/F)*TAU, d=5*(0.5-0.5*C(ph));
   return {skin:'idle',_d:d,
     torso:{y:d,sy:1+.008*S(ph+.4),sx:1-.003*S(ph+.4)},
-    head:{r:1.0*S(ph-.6),y:1.6*S(ph-1.0)}, hair:{r:1.3*S(ph-1.3),sy:1-.012*S(ph-1.3)},
-    upper_arm_R:{r:1.4*S(ph-.8)}, upper_arm_L:{r:-1.4*S(ph-.9)},
-    forearm_R:{r:2*S(ph-1.3)}, forearm_L:{r:-2*S(ph-1.4)},
-    hand_R:{r:3*S(ph-1.8)}, hand_L:{r:-3*S(ph-1.9)}};
+    head:{r:1.0*S(ph-.6),y:1.6*S(ph-1.0)},
+    hair_back_R:{r:1.3*S(ph-1.2)}, hair_back_L:{r:-1.3*S(ph-1.3)},
+    sleeve_R:{r:1.1*S(ph-.8)}, sleeve_L:{r:-1.1*S(ph-.9)},
+    fan:{r:.9*S(ph-1.4)}, tassel:{r:3.2*S(ph-1.6)},
+    skirt:{r:.35*S(ph-.5)}};
 }
-const LOOP_Y=-40;
+// "active" skin = happy pose (kimono_happy_cut.psd): waving hand + fan, little hop
 function loopPose(t){
-  const u=(t%(24/F))/(24/F), w=u*TAU;
+  const u=(t%(24/F))/(24/F), w=u*TAU, hop=S(Math.PI*u);
   return {skin:'active',
-    root:{y:LOOP_Y-42*S(Math.PI*u), sy:1+.025*S(Math.PI*u), sx:1-.02*S(Math.PI*u)},
-    torso:{r:2*S(w)},
-    head:{r:3*S(2*w+.3), y:-5*Math.abs(S(2*w))},
-    hair:{r:2.5*S(2*w-.6), sy:1-.02*S(2*w-.6)},
-    upper_arm_R:{r:5*S(w)}, upper_arm_L:{r:-5*S(w)},
-    forearm_R:{r:7*S(w-.6)}, forearm_L:{r:-7*S(w-.6)},
-    hand_R:{r:12*S(2*w-1)}, hand_L:{r:-12*S(2*w-1)},
-    leg_L:{r:7*S(w-.4)}, leg_R:{r:-3*S(w)}};
+    root:{y:-12*hop, sy:1+.02*hop, sx:1-.015*hop},
+    torso:{r:1.6*S(w)},
+    head:{r:3*S(2*w+.3), y:-4*Math.abs(S(2*w))},
+    hair_back_R:{r:3.2*S(2*w-.6)}, hair_back_L:{r:-3.2*S(2*w-.9)},
+    sleeve_R:{r:2.5*S(w)}, hand_wave:{r:14*S(2*w-1)},
+    sleeve_L:{r:-2.5*S(w-.6)}, fan:{r:6*S(2*w-1.2)},
+    tassel:{r:7*S(2*w-.5)}, skirt:{r:.9*S(w), sx:1+.012*S(2*w)}};
 }
 function inPose(t){                 // 12 f
   const f=t*F;
   if(f<5){ const k=eio(f/5), p=idlePose(0);
-    p.torso.y+=22*k; p.torso.sy*=1-.05*k; p.torso.sx*=1+.035*k; p._d+=22*k;
-    p.head.y+=6*k; p.upper_arm_R.r+=-4*k; p.upper_arm_L.r+=4*k; p.forearm_R.r+=-6*k; p.forearm_L.r+=6*k;
+    p.torso.y+=14*k; p.torso.sy*=1-.04*k; p.torso.sx*=1+.03*k; p._d+=14*k;
+    p.head.y+=5*k; p.sleeve_R.r+=-3*k; p.sleeve_L.r+=3*k;
     return p; }
   const k=eo(clamp((f-5)/7,0,1)), p=loopPose(0);
-  p.root.y=LOOP_Y*k; p.root.sx=1-.08*(1-k); p.root.sy=1+.1*(1-k);
-  p.upper_arm_R.r=-10*(1-k); p.upper_arm_L.r=10*(1-k); p.hand_R.r=-15*(1-k); p.hand_L.r=15*(1-k);
-  p.leg_L.r=-8*(1-k); p.head.y=-6*(1-k);
+  p.root={y:-14*(1-k), sx:1-.07*(1-k), sy:1+.09*(1-k)};
+  p.sleeve_R.r=-6*(1-k); p.hand_wave.r=-18*(1-k); p.fan.r=10*(1-k); p.head.y=-5*(1-k);
   return p;
 }
 function outPose(t){                // 12 f
   const f=t*F;
   if(f<4){ const k=eio(f/4), p=loopPose(0);
-    p.root.y=LOOP_Y*(1-k); p.root.sy=1-.07*k; p.root.sx=1+.05*k; p.leg_L.r=-6*k; p.hand_R.r=8*k; p.hand_L.r=-8*k;
+    p.root={y:0, sy:1-.06*k, sx:1+.045*k}; p.hand_wave.r=8*k; p.fan.r=-5*k;
     return p; }
   const k=eo(clamp((f-4)/8,0,1)), p=idlePose(0);
-  const d=16*(1-k); p.torso.y+=d; p._d+=d; p.torso.sy*=1+.05*(1-k)*C((f-4)/8*Math.PI*1.5); p.head.y+=-5*(1-k);
+  const d=12*(1-k); p.torso.y+=d; p._d+=d; p.torso.sy*=1+.04*(1-k)*C((f-4)/8*Math.PI*1.5); p.head.y+=-4*(1-k);
   return p;
 }
 
+// "sulk" skin = sad pose (kimono_sad_cut.psd): head down, fan hugged to chest
 function sulkLoop(t){
   const f=(t*F)%60, u=f/60, w=u*TAU;
   const br=S(w-1.2);                               // slow heavy breath, one per loop
   const huff=f>=36&&f<48 ? S(Math.PI*(f-36)/12) : 0;  // "hmph": quick turn away and back
-  const tap=(f>=8&&f<14)?S(Math.PI*(f-8)/6):(f>=16&&f<22)?S(Math.PI*(f-16)/6):0;
-  return {skin:'sulk',
-    torso:{y:-3*br, sy:1+.018*br, sx:1+.006*br, r:-1.2*huff},
-    head:{r:-2.5+1.2*S(w-1.8)-4*huff, y:2*S(w-1.6)+3*huff, x:-6*huff},
-    hair:{r:1.2*S(w-2.3)-2.5*S(Math.PI*clamp((f-38)/12,0,1))*(f>=38&&f<50?1:0)},
-    upper_arm_R:{y:-4*br, r:.8*br}, upper_arm_L:{y:-4*br, r:-.8*br},
-    leg_L:{y:-9*tap, r:-1.5*tap}, leg_R:{}};
+  const tap=(f>=8&&f<14)?S(Math.PI*(f-8)/6):(f>=16&&f<22)?S(Math.PI*(f-16)/6):0;  // fidgeting with the fan
+  return {skin:'sulk',_d:-2.5*br,
+    torso:{y:-2.5*br, sy:1+.014*br, sx:1+.005*br, r:-1.0*huff},
+    head:{r:-1.8+1.1*S(w-1.8)-3.8*huff, y:1.8*S(w-1.6)+2.8*huff, x:-5*huff},
+    hair_front:{r:1.0*S(w-2.2)-1.6*huff},
+    hair_back_R:{r:1.2*S(w-2.3)-1.8*huff}, hair_back_L:{r:-1.2*S(w-2.4)+1.4*huff},
+    sleeve_R:{r:.8*br+1.5*tap}, sleeve_L:{r:-.8*br-1.5*tap},
+    fan:{r:2.2*tap-1.5*huff}, tassel:{r:3*S(w-1.0)-4*huff-3*tap},
+    skirt:{r:.3*S(w-.9)}};
 }
 function sulkIn(t){                 // 14 f
   const f=t*F;
   if(f<6){ const k=eio(f/6), p=idlePose(0);
-    p.torso.y-=10*k; p.torso.sy*=1+.035*k; p._d-=10*k; p.head.y-=6*k;
-    p.upper_arm_R.r+=-3*k; p.upper_arm_L.r+=3*k; return p; }
+    p.torso.y-=8*k; p.torso.sy*=1+.03*k; p._d-=8*k; p.head.y-=5*k;
+    p.sleeve_R.r+=-2*k; p.sleeve_L.r+=2*k; return p; }
   const k=eo(clamp((f-6)/8,0,1)), p=sulkLoop(0);
-  p.root={sy:1-.07*(1-k)*C((f-6)/8*Math.PI), sx:1+.05*(1-k)*C((f-6)/8*Math.PI)};
+  p.root={sy:1-.06*(1-k)*C((f-6)/8*Math.PI), sx:1+.045*(1-k)*C((f-6)/8*Math.PI)};
   p.head.r+=-6*(1-k); return p;
 }
 function sulkOut(t){                // 12 f
   const f=t*F;
   if(f<4){ const k=eio(f/4), p=sulkLoop(0); p.root={sy:1-.05*k, sx:1+.04*k}; p.head.r+=3*k; return p; }
   const k=eo(clamp((f-4)/8,0,1)), p=idlePose(0);
-  const d=12*(1-k); p.torso.y+=d; p._d+=d; p.head.y+=-4*(1-k); return p;
+  const d=10*(1-k); p.torso.y+=d; p._d+=d; p.head.y+=-4*(1-k); return p;
 }
 
 let mode='idle',emo=null,tm=0,idleT=0,pending=null,celebrating=false,hold=0,last=performance.now(),lastSkin='idle',fxClock=0,huffDone=false,particles=[];
@@ -1118,25 +1282,36 @@ function go(target){
  else if(emo!==target){pending=target;if(mode==='in'||mode==='loop'){mode='out';tm=0;}}
  else if(mode==='out'){pending=target;}
 }
-function advance(dt){tm+=dt;if(mode==='idle')idleT+=dt;
+function advance(dt){tm+=dt;if(fade>0)fade=Math.max(0,fade-dt/.1);if(mode==='idle')idleT+=dt;
  if(mode==='in'&&tm>=LEN[emo].in){mode='loop';tm-=LEN[emo].in;}
  if(mode==='out'&&tm>=LEN[emo].out){mode='idle';idleT=0;tm=0;const next=pending;pending=null;emo=null;if(next)go(next);}
  if(celebrating&&mode!=='out'){hold-=dt;if(hold<=0)go('idle');}
 }
 function poseNow(){return mode==='idle'?idlePose(idleT):TRACK[emo][mode](tm);}
-function render(pose){
+let lastPose=null,prevPose=null,fade=0;
+function drawRig(pose,alpha){
  const skin=pose.skin,s=SK[skin],P=PLACE[skin],ro=pose.root||{},[gx,gy]=P.ground;
- if(skin!==lastSkin){lastSkin=skin;}
- ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
  const base=new DOMMatrix().translate(P.tx,P.ty).scale(P.k).translate(gx+(ro.x||0),gy+(ro.y||0)).scale(ro.sx??1,ro.sy??1).translate(-gx,-gy);
- ctx.save();ctx.globalAlpha=.32;ctx.fillStyle='#271508';ctx.beginPath();const shx=OX+512-260,shy=OY+1505-32;ctx.ellipse(shx+260,shy+18,115+(-(ro.y||0))*.12,17,0,0,Math.PI*2);ctx.fill();ctx.restore();
  // Resolve joint transforms from the hierarchy, then composite in the PSD's authored layer order.
  for(const n of s.order){const l=s.L[n],o=pose[n]||{},[px,py]=l.pivot;let m=l.parent==='root'?base:W[l.parent];
-  if(skin==='idle'&&(n==='leg_R'||n==='leg_L')){const top=990,sy=(1505-top-(pose._d||0))/(1505-top);m=m.translate(px,1505).scale(1,sy).translate(-px,-1505);}
+  if(n==='skirt'){ // top follows the torso, hem stays planted on the ground; own sway rotates about the waist
+   const sy=(gy-py-(pose._d||0))/(gy-py);
+   m=m.translate(px,gy).scale(o.sx??1,sy*(o.sy??1)).translate(-px,-gy).translate(px,py).rotate(o.r||0).translate(-px,-py);}
   else m=m.translate(px+(o.x||0),py+(o.y||0)).rotate(o.r||0).scale(o.sx??1,o.sy??1).translate(-px,-py);
   W[n]=m;
  }
+ ctx.globalAlpha=alpha;
  for(const n of s.drawOrder){const l=s.L[n],m=W[n],im=s.images[n];if(im.complete&&im.naturalWidth){ctx.setTransform(m);ctx.drawImage(im,l.x,l.y,l.w,l.h);}}
+ ctx.globalAlpha=1;
+}
+function render(pose){
+ const skin=pose.skin,ro=pose.root||{};
+ if(skin!==lastSkin){lastSkin=skin;prevPose=lastPose;fade=1;}
+ lastPose=pose;
+ ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.save();ctx.globalAlpha=.32;ctx.fillStyle='#271508';ctx.beginPath();const shx=OX+512-260,shy=OY+1505-32;ctx.ellipse(shx+260,shy+18,115+(-(ro.y||0))*.12,17,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ if(fade>0&&prevPose)drawRig(prevPose,fade);   // old pose fades out under the new one (~0.1s) so the skin swap doesn't pop
+ drawRig(pose,1);
  ctx.setTransform(1,0,0,1,0,0);
  for(const p of particles){if(p.life<0)continue;const k=Math.max(0,p.life/p.max);ctx.save();ctx.globalAlpha=p.puff?(1-k)*.75:1-Math.pow(k,3);ctx.translate(p.x,p.y);if(p.puff){ctx.fillStyle='rgba(238,240,236,.8)';ctx.beginPath();ctx.arc(0,0,p.size*(.45+k*.7),0,Math.PI*2);ctx.fill();}else{ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.beginPath();for(let j=0;j<8;j++){const a=j*Math.PI/4,r=j%2?p.size*.38:p.size;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();}ctx.restore();}
 }
@@ -1571,6 +1746,15 @@ async function loadConfig(){
   const s=document.getElementById('straightPay'); if(s) s.textContent=CFG.pays.chow;
 }
 Promise.all([loadAssets(), loadConfig()]).then(init);
+
+/* sakura petals (decor): random size / speed / sway, already mid-flight on load */
+(function(){const box=document.getElementById('petalFall');if(!box)return;
+  for(let i=0;i<16;i++){const p=document.createElement('i'),r=Math.random,sz=14+r()*16;
+    p.style.cssText=`left:${r()*100}%;width:${sz}px;height:${sz*.8}px;opacity:${(.45+r()*.4).toFixed(2)};`+
+      `--dur:${(15+r()*13).toFixed(1)}s;--delay:${(-r()*28).toFixed(1)}s;--sx:${(18+r()*34).toFixed(0)}px;--rot:${((r()<.5?-1:1)*(180+r()*360)).toFixed(0)}deg;`+
+      (sz<17?'filter:blur(.6px);':'');
+    box.appendChild(p);}
+})();
 </script>
 </body>
 </html>
