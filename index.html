@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preload" as="image" href="asset/loading.webp">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sakura Mahjong</title>
@@ -748,6 +749,22 @@ html,body,#rotate {background:#291041}
   75%{transform:translateX(calc(var(--sx)*-1)) rotate(calc(var(--rot)*.85))}
   100%{top:106%;transform:translateX(0) rotate(var(--rot))}}
 @media (prefers-reduced-motion:reduce){#petalFall{display:none}}
+/* ---------- loading screen: bar follows real asset loading; START appears when everything is ready ---------- */
+#loading{position:absolute;inset:0;z-index:9999;overflow:hidden;background:#1d0b34;transition:opacity .6s ease}
+#loading.hide{opacity:0;pointer-events:none}
+#loading .ld-art{position:absolute;left:50%;top:0;height:100%;aspect-ratio:910/1728;transform:translateX(-50%);background:url('asset/loading.webp') 0 0/100% 100% no-repeat}
+#loading .ld-track{position:absolute;left:14.4%;top:89.3%;width:70.1%;height:2.55%;border-radius:999px;background:#561641;box-shadow:inset 0 2px 5px #000a;overflow:hidden}
+#loading .ld-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:linear-gradient(90deg,#c32fc0,#f72c86 45%,#ff6f6a 72%,#ffe58a);box-shadow:inset 0 3px 4px #fff7,inset 0 -3px 4px #a1105a88}
+#loading .ld-text,#loading .ld-start{position:absolute;left:50%;top:94.9%;transform:translate(-50%,-50%);white-space:nowrap}
+#loading .ld-text{font:700 24px/1 Georgia,'Times New Roman',serif;letter-spacing:.28em;color:#fff1c8;text-shadow:0 2px 0 #7a4b12,0 0 10px #ffb85a88}
+#loading .ld-start{width:300px;height:68px;border:3px solid #fff2b0;border-radius:999px;cursor:pointer;opacity:0;pointer-events:none;
+  font:800 32px/1 Georgia,'Times New Roman',serif;letter-spacing:.3em;text-indent:.3em;color:#6a1233;text-shadow:0 1px 0 #fff3c4;
+  background:linear-gradient(#ffeaa0,#f5bd4d 55%,#d08a2c);box-shadow:0 0 0 3px #b9741f,0 8px 18px #2a0a1ccc,inset 0 3px 5px #fff9}
+#loading.ready .ld-text{display:none}
+#loading.ready .ld-start{opacity:1;pointer-events:auto;animation:ldPulse 1.4s ease-in-out infinite}
+#loading .ld-start:active{transform:translate(-50%,-50%) scale(.96)}
+@keyframes ldPulse{0%,100%{box-shadow:0 0 0 3px #b9741f,0 8px 18px #2a0a1ccc,inset 0 3px 5px #fff9,0 0 0 0 #ffd36a00}50%{box-shadow:0 0 0 3px #b9741f,0 8px 18px #2a0a1ccc,inset 0 3px 5px #fff9,0 0 22px 8px #ffd36acc}}
+@media (prefers-reduced-motion:reduce){#loading.ready .ld-start{animation:none}#loading{transition-duration:.01ms}}
 </style>
 </head>
 <body>
@@ -761,6 +778,13 @@ html,body,#rotate {background:#291041}
   <div class="petal" style="left:960px;top:70px;transform:rotate(10deg)"></div>
   <div class="petal" style="left:1240px;top:350px;transform:rotate(-60deg)"></div>
 
+  <div id="loading" role="dialog" aria-label="Loading">
+    <div class="ld-art">
+      <div class="ld-track"><div class="ld-fill"></div></div>
+      <div class="ld-text">LOADING… 0%</div>
+      <button class="ld-start" type="button" disabled>START</button>
+    </div>
+  </div>
   <div id="petalFall" aria-hidden="true"></div>
   <div class="host" id="host" aria-hidden="true"><canvas id="hostCanvas" width="960" height="680"></canvas></div>
 
@@ -1745,7 +1769,7 @@ async function loadConfig(){
   }catch(e){ console.warn('Không đọc được config.json, dùng payout mặc định:', e.message); }
   const s=document.getElementById('straightPay'); if(s) s.textContent=CFG.pays.chow;
 }
-Promise.all([loadAssets(), loadConfig()]).then(init);
+Promise.all([loadAssets(), loadConfig()]).then(init).catch(e=>console.error(e)).finally(()=>{window.__gameReady=true;window.dispatchEvent(new Event('gameready'));});
 
 /* sakura petals (decor): random size / speed / sway, already mid-flight on load */
 (function(){const box=document.getElementById('petalFall');if(!box)return;
@@ -1754,6 +1778,29 @@ Promise.all([loadAssets(), loadConfig()]).then(init);
       `--dur:${(15+r()*13).toFixed(1)}s;--delay:${(-r()*28).toFixed(1)}s;--sx:${(18+r()*34).toFixed(0)}px;--rot:${((r()<.5?-1:1)*(180+r()*360)).toFixed(0)}deg;`+
       (sz<17?'filter:blur(.6px);':'');
     box.appendChild(p);}
+})();
+
+/* ---------- loading screen controller ---------- */
+(function(){
+  const root=document.getElementById('loading'); if(!root) return;
+  const fill=root.querySelector('.ld-fill'), txt=root.querySelector('.ld-text'), btn=root.querySelector('.ld-start');
+  const IMGS=["asset/background.png", "asset/runtime-01-card-back.png", "asset/runtime-02-card-front.png", "asset/runtime-03-spring.png", "asset/runtime-04-summer.png", "asset/runtime-05-autumn.png", "asset/runtime-06-winter.png", "asset/runtime-07-plaque.png", "asset/runtime-08-panel.png", "asset/runtime-09-row.png", "asset/runtime-10-wood.png", "asset/runtime-11-branches.png", "asset/runtime-12-canopy.png", "asset/runtime-13-petal.png", "asset/runtime-14-door-left.png", "asset/runtime-15-door-right.png", "asset/runtime-16-reel-frame.png", "asset/runtime-17-generated-ceramic.png", "asset/runtime-18-tile_back.png", "asset/win-popup/flag-base.png", "asset/win-popup/scroll.png", "asset/win-popup/title-win.png", "asset/win-popup/title-big-win.png", "asset/win-popup/title-mega-win.png", "asset/character-kimono/active-fan.webp", "asset/character-kimono/active-hair_back_L.webp", "asset/character-kimono/active-hair_back_R.webp", "asset/character-kimono/active-hand_wave.webp", "asset/character-kimono/active-head.webp", "asset/character-kimono/active-skirt.webp", "asset/character-kimono/active-sleeve_L.webp", "asset/character-kimono/active-sleeve_R.webp", "asset/character-kimono/active-tassel.webp", "asset/character-kimono/active-torso.webp", "asset/character-kimono/idle-fan.webp", "asset/character-kimono/idle-hair_back_L.webp", "asset/character-kimono/idle-hair_back_R.webp", "asset/character-kimono/idle-head.webp", "asset/character-kimono/idle-skirt.webp", "asset/character-kimono/idle-sleeve_L.webp", "asset/character-kimono/idle-sleeve_R.webp", "asset/character-kimono/idle-tassel.webp", "asset/character-kimono/idle-torso.webp", "asset/character-kimono/sulk-fan.webp", "asset/character-kimono/sulk-hair_back_L.webp", "asset/character-kimono/sulk-hair_back_R.webp", "asset/character-kimono/sulk-hair_front.webp", "asset/character-kimono/sulk-head.webp", "asset/character-kimono/sulk-skirt.webp", "asset/character-kimono/sulk-sleeve_L.webp", "asset/character-kimono/sulk-sleeve_R.webp", "asset/character-kimono/sulk-tassel.webp", "asset/character-kimono/sulk-torso.webp"];
+  const jobs=IMGS.map(src=>new Promise(res=>{const im=new Image();im.onload=im.onerror=()=>res();im.src=src;}));
+  Object.values(AUDIO).forEach(a=>jobs.push(new Promise(res=>{ if(a.readyState>=3) return res();
+    a.addEventListener('canplaythrough',()=>res(),{once:true}); a.addEventListener('error',()=>res(),{once:true}); setTimeout(res,3000); })));   // iOS won't preload audio before a tap -> don't wait forever
+  jobs.push(new Promise(res=>{ if(window.__gameReady) return res(); addEventListener('gameready',()=>res(),{once:true}); }));   // game's own init (assets + config + board build)
+  jobs.push((document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).catch(()=>{}));
+  let done=0; jobs.forEach(p=>p.then(()=>{done++;}));
+  const MIN_MS=1500, t0=performance.now(); let shown=0;
+  function tick(now){
+    const target=Math.min(done/jobs.length,(now-t0)/MIN_MS,1);      // never faster than MIN_MS, never ahead of real loading
+    shown+=(target-shown)*.14; if(target-shown<.003) shown=target;
+    fill.style.width=(shown*100).toFixed(1)+'%'; txt.textContent='LOADING… '+Math.round(shown*100)+'%';
+    if(shown>=1){ root.classList.add('ready'); btn.disabled=false; try{btn.focus({preventScroll:true});}catch(e){} return; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  btn.addEventListener('click',()=>{ startBgm(); root.classList.add('hide'); setTimeout(()=>root.remove(),700); });
 })();
 </script>
 </body>
