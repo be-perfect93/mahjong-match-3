@@ -1076,12 +1076,12 @@ function makeGeom(mode){
   const slots=[], add=(x,y,l,chest)=>slots.push({idx:slots.length,x,y,l,chest:!!chest,cov:[],tile:null});
   let UW,UH,chestRect;
   if(mode==='stack'){
-    UW=6; UH=4.24; const raise=.12;                                    // mỗi tầng nhô cao thêm 0.12 ô để thấy độ nổi
-    for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j+2*raise,0);   // tầng dưới: 6x4 = 24 quân (các quân giữa nằm dưới hòm là quân thường, lộ ra khi gỡ quân hòm)
+    UW=6; UH=4; const raise=.12;                                    // mỗi tầng nhô cao thêm 0.12 ô để thấy độ nổi
+    for(let j=0;j<4;j++) for(let i=0;i<6;i++) add(i,j,0);   // tầng dưới: 6x4 = 24 quân (các quân giữa nằm dưới hòm là quân thường, lộ ra khi gỡ quân hòm)
     for(let j=0;j<3;j++) for(let i=0;i<5;i++)                          // tầng trên: 5x3 = 15 quân, mỗi quân nằm giữa 4 quân tầng dưới (so le 2 chiều)
-      add(i+.5,j+.5+raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm
+      add(i+.5,j+.5-raise,1,j===1&&i>=1&&i<=3);                        // 3 quân giữa hàng giữa thuộc hòm
     // Board có 39 ô: Key là "quân thừa" tự dùng ngay đầu ván (xem layout/startRound)
-    chestRect={x:1.5,y:1.62,w:3,h:1};
+    chestRect={x:1.5,y:1.38,w:3,h:1};
   } else {
     UW=CFG.cols; UH=CFG.rows;
     for(let j=0;j<UH;j++) for(let i=0;i<UW;i++) add(i,j,0);
@@ -1133,7 +1133,7 @@ function layout(){
   if(key && underChest(key.slot)){ const other=rest.find(t=>t!==key && !underChest(t.slot)); [key.slot,other.slot]=[other.slot,key.slot]; }
   rest.forEach(t=>{ t.slot.tile=t; });
   tiles.forEach(t=>{ if(t.slot) placeTile(t); });
-  if(firstTile){ Object.assign(firstTile.el.style, slotBox({x:2.5,y:1.5}), {zIndex:'55'}); firstTile.el.classList.add('gone'); }   // ẩn cho tới khi bay vào khay: xuất hiện giữa board, ngay trên hòm
+  if(firstTile){ Object.assign(firstTile.el.style, slotBox({x:2.5,y:1.26}), {zIndex:'55'}); firstTile.el.classList.add('gone'); }   // ẩn cho tới khi bay vào khay: xuất hiện giữa board, ngay trên hòm
   placeChest(); updateCovers();
 }
 function makeTileEl(t){
